@@ -1,0 +1,10 @@
+1. cd ~/gtest/build
+2. cmake ..
+3. cd ~/gtest/build/CMakeFiles/gtest.dir
+4. in file flags.make add CXX_FLAGS += -std=c++11
+5. cd ~/gtest/build/CMakeFiles/gtest_main.dir
+6. in file flags.make add CXX_FLAGS += -std=c++11
+7. make
+8. g++ -std=c++11 -pthread -I../include -c -o prog.o prog.c
+9. g++ -o prog prog.o -Llib -lgtest -pthread
+10. ./prog

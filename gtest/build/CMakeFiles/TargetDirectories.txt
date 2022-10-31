@@ -1,0 +1,4 @@
+/home/aleksandr/gtest/build/CMakeFiles/rebuild_cache.dir
+/home/aleksandr/gtest/build/CMakeFiles/edit_cache.dir
+/home/aleksandr/gtest/build/CMakeFiles/gtest_main.dir
+/home/aleksandr/gtest/build/CMakeFiles/gtest.dir
