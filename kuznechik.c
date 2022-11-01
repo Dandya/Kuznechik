@@ -1,4 +1,8 @@
-static const uint8_t permutationEncrypt[256] = {
+#ifndef _KUZNECHIK_H
+#include "kuznechik.h"
+#endif
+
+static const uint8_t permutation_encrypt[256] = {
     252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233, 119, 240, 219, 147, 46, 153, 
     186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101, 90, 226, 92, 239, 33, 129, 28, 60, 66, 139, 1, 142, 
     79, 5, 132, 2, 174, 227, 106, 143, 160, 6, 11,237, 152, 127, 212, 211, 31, 235, 52, 44, 81, 234, 200, 72, 
@@ -12,7 +16,7 @@ static const uint8_t permutationEncrypt[256] = {
     108, 82, 89, 166, 116, 210, 230, 244, 180, 192, 209, 102, 175, 194, 57, 75, 99, 182
 };    
 
-static const uint8_t permutationDecrypt[256] = {
+static const uint8_t permutation_decrypt[256] = {
     165, 45, 50, 143, 14, 48, 56, 192, 84, 230, 158, 57, 85, 126, 82, 145, 100, 3, 87, 90, 28, 96, 7, 24, 33, 
     114, 168, 209, 41, 198, 164, 63, 224, 39, 141, 12, 130, 234, 174, 180, 154, 99, 73, 229, 66, 228, 21, 183, 
     200, 6, 112, 157, 65, 117, 25, 201, 170, 252, 77, 191, 42, 115, 132, 213, 195, 175, 43, 134, 167, 177, 178, 
@@ -26,34 +30,94 @@ static const uint8_t permutationDecrypt[256] = {
     146, 58, 1, 38, 18, 26, 72, 104, 245, 129, 139, 199, 214, 32, 10, 8, 0, 76, 215, 116
 };
 
+static const uint8_t coeff_for_Lbox[16] = { 1, 148, 32, 133, 16, 194, 192, 1, 251, 1, 192, 194, 16, 133, 32, 148 };
 
-static void Xbox(vector128bit * block, vector128bit key)
-{
+static void Xbox(vector128bit * block, vector128bit key) {
     block->half[0] ^= key.half[0];
     block->half[1] ^= key.half[1];
 }
 
-static void SboxEncrypt(vector128bit * block)
-{
+static uint8_t GF256Mul(uint8_t x, uint8_t y) {
+    uint8_t result = 0;
+    while(y != 0) {
+        if(y & 1 == 1) {
+            result ^= x;
+        }
+        x = (x << 1) ^ ((x & 0x80) ? 0xc3 : 0); // x^8+x^7+x^6+x+1 is 451 = 0x1c3, x^8 (mod x^8+x^7+x^6+x+1) = x^7+x^6+x+1 is 195 = 0xc3
+        y >>= 1;
+    }
+    return result;
+} 
+
+static void SboxEncrypt(vector128bit * block) {
     for(int i = 0; i < 16; i++) {
-        block->bytes[i] = permutationEncrypt[block->bytes[i]];
+        block->bytes[i] = permutation_encrypt[block->bytes[i]];
     } 
 }
 
-static void LboxEncrypt(vector128bit * block)
-{
+static void RboxEncrypt(vector128bit * block) {
+    uint8_t result = 0;
+    for(int i = 0; i < 15; i++) {
+        result ^= GF256Mul(block->bytes[i], coeff_for_Lbox[i]); // l function
+        block->bytes[i] = block->bytes[i+1];
+    }
+    block->bytes[15] = GF256Mul(block->bytes[15], coeff_for_Lbox[15]) ^ result;
 }
 
-static void SboxDecrypt(vector128bit * block)
-{
+static void LboxEncrypt(vector128bit * block) {
     for(int i = 0; i < 16; i++) {
-        block->bytes[i] = permutationDecrypt[block->bytes[i]];
+        RboxEncrypt(block);
+    }
+}
+
+static void SboxDecrypt(vector128bit * block) {
+    for(int i = 0; i < 16; i++) {
+        block->bytes[i] = permutation_decrypt[block->bytes[i]];
     } 
 }
 
-static void LboxDecrypt(vector128bit * block)
-{
+static void RboxDecrypt(vector128bit * block) {
+    uint8_t result = 0;
+    uint8_t byte = block->bytes[15];
+    for(int i = 15; i > 0; i--) {
+        block->bytes[i] = block->bytes[i-1];
+        result ^= GF256Mul(block->bytes[i], coeff_for_Lbox[i]); // l function
+    }
+    block->bytes[0] = GF256Mul(byte, coeff_for_Lbox[0]) ^ result;
 }
 
+static void LboxDecrypt(vector128bit * block) {
+    for(int i = 0; i < 16; i++) {
+        RboxDecrypt(block);
+    }
+}
 
+static void Fbox(vector128bit key, vector128bit * v_1, vector128bit * v_0) {
+    vector128bit tmp = *v_1;
+    Xbox(v_1, key);
+    SboxEncrypt(v_1);
+    LboxEncrypt(v_1);
+    v_1->half[0] ^= v_0->half[0];
+    v_1->half[1] ^= v_0->half[1];
+    *v_0 = tmp;
+}
+
+/// @brief Function creates 10 iteration keys.Checking for null must be done by the calling function.
+/// @param key is array of 2 vector128bit
+/// @param array_for_keys is pointer to array for 10 vector128bit
+static void createIterationKeys(vector128bit * key, vector128bit * array_for_keys) {
+    array_for_keys[0] = key[1];
+    array_for_keys[1] = key[0];
+    vector128bit coeff;
+    for(int i = 1; i <= 4; i++) {
+        array_for_keys[2*i] = array_for_keys[2*i-2];
+        array_for_keys[2*i+1] = array_for_keys[2*i-1];
+        for(int j = 1; j <= 8; j++) {
+            coeff.half[0] = 8*(i-1)+j;
+            coeff.half[1] = 0; 
+            LboxEncrypt(&coeff);
+            Fbox(coeff, array_for_keys+2*i, array_for_keys+2*i+1);
+        }
+    }
+}
 
