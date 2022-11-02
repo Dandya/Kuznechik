@@ -1,157 +1,157 @@
-#include "kuznechik.h"
-#include "kuznechik.c"
+#include "../include/kuznechik.h"
+#include "../kuznechik.c"
 #include "./gtest/include/gtest/gtest.h"
 
 vector128bit v, result;
 
-TEST(Base, SboxEnCrypt) 
+TEST(Base, substitutionFuncEncrypt) 
 {
     v.half[0] = 0x1122334455667700;
     v.half[1] = 0xffeeddccbbaa9988;
     result.half[0] = 0x7765aeea0c9a7efc;
     result.half[1] = 0xb66cd8887d38e8d7;
-    SboxEncrypt(&v);
+    substitutionFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x7e7b262523280d39;
     result.half[1] = 0x559d8dd7bd06cbfe;
-    SboxEncrypt(&v);
+    substitutionFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0d80ef5c5a81c50b;
     result.half[1] = 0x0c3322fed531e463;
-    SboxEncrypt(&v);
+    substitutionFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0xc5df529c13f5acda;
     result.half[1] = 0x23ae65633f842d29;
-    SboxEncrypt(&v);
+    substitutionFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
 
-TEST(Base, RboxEnCrypt) {
+TEST(Base, relocateBytesEncrypt) {
     v.half[0] = 0x0000000000000100;
     v.half[1] = 0x0000000000000000;
     result.half[0] = 0x0000000000000001;
     result.half[1] = 0x9400000000000000;
-    RboxEncrypt(&v);
+    relocateBytes(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0xa594000000000000;
-    RboxEncrypt(&v);
+    relocateBytes(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0x64a5940000000000;
-    RboxEncrypt(&v);
+    relocateBytes(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0x0d64a59400000000;
-    RboxEncrypt(&v);
+    relocateBytes(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
 
-TEST(Base, LboxEnCrypt){
+TEST(Base, linearFuncEncrypt){
     v.half[0] = 0x0000000000000000;
     v.half[1] = 0x64a5940000000000;
     result.half[0] = 0xc3166e4b7fa2890d;
     result.half[1] = 0xd456584dd0e3e84c;
-    LboxEncrypt(&v);
+    linearFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0xd42fbc4ffea5de9a;
     result.half[1] = 0x79d26221b87b584c;
-    LboxEncrypt(&v);
+    linearFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x8b7b68f66b513c13;
     result.half[1] = 0x0e93691a0cfc6040;
-    LboxEncrypt(&v);
+    linearFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0xfd97bcb0b44b8580;
     result.half[1] = 0xe6a8094fee0aa204;
-    LboxEncrypt(&v);
+    linearFunc(&v, ENCRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
 
-TEST(Base, SboxDeCrypt) 
+TEST(Base, substitutionFuncDecrypt) 
 {
     v.half[0] = 0xc5df529c13f5acda;
     v.half[1] = 0x23ae65633f842d29;
     result.half[0] = 0x0d80ef5c5a81c50b;
     result.half[1] = 0x0c3322fed531e463;
-    SboxDecrypt(&v);
+    substitutionFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x7e7b262523280d39;
     result.half[1] = 0x559d8dd7bd06cbfe;
-    SboxDecrypt(&v);
+    substitutionFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x7765aeea0c9a7efc;
     result.half[1] = 0xb66cd8887d38e8d7;
-    SboxDecrypt(&v);
+    substitutionFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x1122334455667700;
     result.half[1] = 0xffeeddccbbaa9988;
-    SboxDecrypt(&v);
+    substitutionFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
 
-TEST(Base, RboxDecrypt) {
+TEST(Base, relocateBytesDecrypt) {
     v.half[0] = 0x0000000000000000;
     v.half[1] = 0x0d64a59400000000;
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0x64a5940000000000;
-    RboxDecrypt(&v);
+    relocateBytes(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0xa594000000000000;
-    RboxDecrypt(&v);
+    relocateBytes(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000001;
     result.half[1] = 0x9400000000000000;
-    RboxDecrypt(&v);
+    relocateBytes(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000100;
     result.half[1] = 0x0000000000000000;
-    RboxDecrypt(&v);
+    relocateBytes(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
 
-TEST(Base, LboxDecrypt){
+TEST(Base, linearFuncDecrypt){
     v.half[0] = 0xfd97bcb0b44b8580;
     v.half[1] = 0xe6a8094fee0aa204;
     result.half[0] = 0x8b7b68f66b513c13;
     result.half[1] = 0x0e93691a0cfc6040;
-    LboxDecrypt(&v);
+    linearFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0xd42fbc4ffea5de9a;
     result.half[1] = 0x79d26221b87b584c;
-    LboxDecrypt(&v);
+    linearFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0xc3166e4b7fa2890d;
     result.half[1] = 0xd456584dd0e3e84c;
-    LboxDecrypt(&v);
+    linearFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
     result.half[0] = 0x0000000000000000;
     result.half[1] = 0x64a5940000000000;
-    LboxDecrypt(&v);
+    linearFunc(&v, DECRYPT);
     EXPECT_EQ(result.half[0], v.half[0]);
     EXPECT_EQ(result.half[1], v.half[1]);
 }
@@ -163,7 +163,7 @@ TEST(Base, createKeys) {
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     vector128bit iteration_keys[10];
-    createIterationKeys(key, iteration_keys);
+    createIterationKeysKuz(key, iteration_keys);
     //key 0
     EXPECT_EQ(0x0011223344556677, iteration_keys[0].half[0]);
     EXPECT_EQ(0x8899aabbccddeeff, iteration_keys[0].half[1]);
@@ -194,6 +194,38 @@ TEST(Base, createKeys) {
     //key 9
     EXPECT_EQ(0x755dbaa88e4a4043, iteration_keys[9].half[0]);
     EXPECT_EQ(0x72e9dd7416bcf45b, iteration_keys[9].half[1]);
+}
+
+TEST(Base, BlockEncryptKuz) {
+    vector128bit block;
+    block.half[0] = 0xffeeddccbbaa9988;
+    block.half[1] = 0x1122334455667700;
+    vector128bit key[2];
+    key[0].half[0] = 0x0123456789abcdef;
+    key[0].half[1] = 0xfedcba9876543210;
+    key[1].half[0] = 0x0011223344556677;
+    key[1].half[1] = 0x8899aabbccddeeff;
+    vector128bit iteration_keys[10];
+    createIterationKeysKuz(key, iteration_keys);
+    cryptBlockKuz(&block, iteration_keys, ENCRYPT);
+    EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
+    EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
+}
+
+TEST(Base, BlockDecryptKuz) {
+    vector128bit block;
+    block.half[0] = 0x5a468d42b9d4edcd;
+    block.half[1] = 0x7f679d90bebc2430;
+    vector128bit key[2];
+    key[0].half[0] = 0x0123456789abcdef;
+    key[0].half[1] = 0xfedcba9876543210;
+    key[1].half[0] = 0x0011223344556677;
+    key[1].half[1] = 0x8899aabbccddeeff;
+    vector128bit iteration_keys[10];
+    createIterationKeysKuz(key, iteration_keys);
+    cryptBlockKuz(&block, iteration_keys, DECRYPT);
+    EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
+    EXPECT_EQ(0x1122334455667700, block.half[1]);
 }
 
 int main(int argc, char **argv)
