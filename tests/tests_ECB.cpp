@@ -105,7 +105,7 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_1));
     fclose(open_text);
     fclose(close_text);
 
@@ -121,24 +121,16 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_1, 0));
     fclose(open_text);
     fclose(close_text);
 
-
     open_text = fopen("OpenText.txt", "r");
-    fread(&block, SIZE_BLOCK, 1, open_text);
-    EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
-    EXPECT_EQ(0x1122334455667700, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, open_text);
-    EXPECT_EQ(0x8899aabbcceeff0a, block.half[0]);
-    EXPECT_EQ(0x0011223344556677, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, open_text);
-    EXPECT_EQ(0x99aabbcceeff0a00, block.half[0]);
-    EXPECT_EQ(0x1122334455667788, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, open_text);
-    EXPECT_EQ(0xaabbcceeff0a0011, block.half[0]);
-    EXPECT_EQ(0x2233445566778899, block.half[1]);
+    for(int i = 0; i < 10; i++) {
+        fread(&block, SIZE_BLOCK, 1, open_text);
+        EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
+        EXPECT_EQ(0x1122334455667700, block.half[1]);
+    }
     fread(&block, SIZE_BLOCK, 1, open_text);
     EXPECT_NE(feof(open_text), 0);
     fclose(open_text);
