@@ -93,8 +93,6 @@ vector128bit getMAC(FILE * input, vector128bit * key , uint8_t size_MAC)
         encryptBlockKuz(&imito, iteration_keys);
     }
 
-
-    //read last block and create helping key
     vector128bit helping_key;
     if(remainder != 0)
     {
