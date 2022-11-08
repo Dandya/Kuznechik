@@ -110,20 +110,13 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    fread(&block, SIZE_BLOCK, 1, close_text);
-    EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
-    EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, close_text);
-    EXPECT_EQ(0x285452d76718d08b, block.half[0]);
-    EXPECT_EQ(0xb429912c6e0032f9, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, close_text);
-    EXPECT_EQ(0xf3f5a5313bd4b157, block.half[0]);
-    EXPECT_EQ(0xf0ca33549d247cee, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, close_text);
-    EXPECT_EQ(0x3a02c4c5aa8ada98, block.half[0]);
-    EXPECT_EQ(0xd0b09ccde830b9eb, block.half[1]);
-    fread(&block, SIZE_BLOCK, 1, close_text);
-    EXPECT_EQ(feof(close_text), 0);
+    for(int i = 0; i < 10; i++) {
+        fread(&block, SIZE_BLOCK, 1, close_text);
+        EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
+        EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
+    }
+    EXPECT_EQ(0, fread(&block, SIZE_BLOCK, 1, close_text));
+    EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
