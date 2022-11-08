@@ -172,13 +172,13 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
     }
-    EXPECT_EQ(4, fread(&block, 1, 5, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_1, 0));
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_1, 4));
     fclose(open_text);
     fclose(close_text);
 
@@ -188,7 +188,7 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
     }
-    EXPECT_EQ(0, fread(&block, SIZE_BLOCK, 1, close_text));
+    EXPECT_EQ(4, fread(&block, 1, 5, close_text));
     EXPECT_NE(feof(open_text), 0);
     fclose(open_text);
 }
