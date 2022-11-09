@@ -8,6 +8,11 @@ testECB:
 	@g++ -o tests_ECB.exe tests_ECB.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_ECB.exe
 	rm *.o 
+testIMITO:
+	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_IMITO.o ./tests/tests_IMITO.cpp
+	@g++ -o tests_IMITO.exe tests_IMITO.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_IMITO.exe
+	rm *.o 
 testBaseTable:
 	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_Base.o ./tests/tests_Base.cpp
 	@g++ -o tests_Base.exe tests_Base.o -L./tests/gtest/build/lib -lgtest -pthread
@@ -18,3 +23,8 @@ testECBTable:
 	@g++ -o tests_ECB.exe tests_ECB.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_ECB.exe
 	rm *.o
+testIMITOTable:
+	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_IMITO.o ./tests/tests_IMITO.cpp
+	@g++ -o tests_IMITO.exe tests_IMITO.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_IMITO.exe
+	rm *.o 

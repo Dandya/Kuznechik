@@ -8,8 +8,7 @@
 /// @param key is pointer on block of memory of size 256 bit.
 /// @param mode_padding_nulls is function using which  bytes are padded in last block.
 /// @return 0 is good, -1 is key = NULL, -2 is error of read or write file.
-int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls)
-{
+int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls) {
     if( key == NULL )                     { return -1; }
     if( input == NULL || output == NULL ) { return -2; }
 
@@ -96,8 +95,7 @@ int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
 ///     If mode_padding_nulls != PROC_ADD_NULLS_1 then this parameter is ignored.
 /// @return 0 is good, -1 is key = NULL, -2 is error of read or write file, 
 ///     -3 if using PROC_ADD_NULLS_1 and length_last_block > 16 or length_last_block <= 0.
-int decryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls, int length_last_block)
-{
+int decryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls, int length_last_block) {
     if( key == NULL )                                       { return -1; }
     if( input == NULL || output == NULL )                   { return -2; }
     if( mode_padding_nulls == PROC_ADD_NULLS_1 && 
