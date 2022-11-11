@@ -42,20 +42,19 @@ int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC)
     uint64_t size_input_file = getSizeFile(input);
     if( size_input_file == 0 ) { return 0; }
     
-    vector128bit * buffer;
-    int buffer_size;
-    if( size_input_file >= 1048576) { buffer_size = 1048576; } 
-    else { buffer_size = 1024; }
-    buffer = (vector128bit *)malloc(buffer_size);
-    if( buffer == NULL ) { buffer_size = 0; }
-    
-    
     vector128bit iteration_keys[10];
     int result = createIterationKeysKuz(key, iteration_keys);
     if( result < 0 ) { 
         fprintf(stderr, "Error create iteration keys\n");
         return result; 
     }
+
+    vector128bit * buffer;
+    int buffer_size;
+    if( size_input_file >= 1048576) { buffer_size = 1048576; } 
+    else { buffer_size = 1024; }
+    buffer = (vector128bit *)malloc(buffer_size);
+    if( buffer == NULL ) { buffer_size = 0; }
 
     vector128bit imito;
     imito.half[0] = 0;
@@ -69,6 +68,7 @@ int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC)
         for(iteration = 0; iteration < count_buffers_for_crypt; iteration++) {
             if( fread(buffer, buffer_size, 1, input) != 1 ) { 
                 fprintf(stderr, "%d: Error in fread\n", __LINE__);
+                free(buffer);
                 return -2; 
             }
             for(int i = 0; i < count_blocks_in_buffer; i++) {
