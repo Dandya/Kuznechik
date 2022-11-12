@@ -18,6 +18,11 @@ testCBC:
 	@g++ -o tests_CBC.exe tests_CBC.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_CBC.exe
 	rm *.o 
+testCTR:
+	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_CTR.o ./tests/tests_CTR.cpp
+	@g++ -o tests_CTR.exe tests_CTR.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_CTR.exe
+	rm *.o 
 testBaseTable:
 	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_Base.o ./tests/tests_Base.cpp
 	@g++ -o tests_Base.exe tests_Base.o -L./tests/gtest/build/lib -lgtest -pthread
@@ -37,4 +42,9 @@ testCBCTable:
 	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_CBC.o ./tests/tests_CBC.cpp
 	@g++ -o tests_CBC.exe tests_CBC.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_CBC.exe
+	rm *.o 
+testCTRTable:
+	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_CTR.o ./tests/tests_CTR.cpp
+	@g++ -o tests_CTR.exe tests_CTR.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_CTR`.exe
 	rm *.o 
