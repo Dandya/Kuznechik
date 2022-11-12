@@ -3,7 +3,7 @@
 #include "./gtest/include/gtest/gtest.h"
 #include <sys/time.h>
 
-TEST(ECB, TestFromGOST) {
+TEST(CBC, TestFromGOST) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -87,7 +87,7 @@ TEST(ECB, TestFromGOST) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_1_full) {
+TEST(CBC, PROC_ADD_NULLS_1_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -139,7 +139,7 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_1_not_full) {
+TEST(CBC, PROC_ADD_NULLS_1_not_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -192,7 +192,7 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_2_full) {
+TEST(CBC, PROC_ADD_NULLS_2_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -244,7 +244,7 @@ TEST(ECB, PROC_ADD_NULLS_2_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_2_not_full) {
+TEST(CBC, PROC_ADD_NULLS_2_not_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -297,7 +297,7 @@ TEST(ECB, PROC_ADD_NULLS_2_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_3_full) {
+TEST(CBC, PROC_ADD_NULLS_3_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -349,7 +349,7 @@ TEST(ECB, PROC_ADD_NULLS_3_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_3_not_full) {
+TEST(CBC, PROC_ADD_NULLS_3_not_full) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -402,7 +402,7 @@ TEST(ECB, PROC_ADD_NULLS_3_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, SpeedlessKb) {
+TEST(CBC, SpeedlessKb) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -457,7 +457,7 @@ TEST(ECB, SpeedlessKb) {
     fclose(close_text);
 }
 
-TEST(ECB, SpeedmoreKb) {
+TEST(CBC, SpeedmoreKb) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)
@@ -512,7 +512,7 @@ TEST(ECB, SpeedmoreKb) {
     fclose(close_text);
 }
 
-TEST(ECB, SpeedmoreMb) {
+TEST(CBC, SpeedmoreMb) {
     FILE * open_text = fopen("OpenText.txt", "w");
     FILE * close_text;
     if(open_text == NULL)

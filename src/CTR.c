@@ -21,7 +21,7 @@ static void addOne(vector128bit * a) {
 int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_in_bytes, vector128bit * initial_vector) {
     if( key == NULL )                              { return -1; }
     if( input == NULL || output == NULL )          { return -2; }
-    if( size_gamma_in_bytes > 16 || size_block_in_bytes <= 0 ) { return -3; }
+    if( size_block_in_bytes > 16 || size_block_in_bytes <= 0 ) { return -3; }
     if( initial_vector == NULL)                    { return -4; }
 
     uint64_t size_input_file = getSizeFile(input);
@@ -36,8 +36,8 @@ int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_
     }
 
     vector128bit gamma;
-    gamma.half[0] = initial_vector->half[0];
-    gamma.half[1] = 0;
+    gamma.half[0] = 0;
+    gamma.half[1] = initial_vector->half[0];
     vector128bit gamma_for_encrypt;
     int index_of_start = SIZE_BLOCK - size_block_in_bytes;
 
@@ -45,7 +45,7 @@ int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_
     int buffer_size;
     if( size_input_file >= 1048576) { buffer_size = 1048576 - 1048576%size_block_in_bytes; } 
     else { buffer_size = 1024 - 1024%size_block_in_bytes; } 
-    buffer = (vector128bit *)malloc(buffer_size);
+    buffer = (uint8_t *)malloc(buffer_size);
     if( buffer == NULL ) { buffer_size = 0; }
     
     uint64_t count_blocks_in_buffer = buffer_size/size_block_in_bytes;
