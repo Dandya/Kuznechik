@@ -23,6 +23,16 @@ testCTR:
 	@g++ -o tests_CTR.exe tests_CTR.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_CTR.exe
 	rm *.o 
+testOFB:
+	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_OFB.o ./tests/tests_OFB.cpp
+	@g++ -o tests_OFB.exe tests_OFB.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_OFB.exe
+	rm *.o 
+testCFB:
+	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_CFB.o ./tests/tests_CFB.cpp
+	@g++ -o tests_CFB.exe tests_CFB.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_CFB.exe
+	rm *.o 
 testBaseTable:
 	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_Base.o ./tests/tests_Base.cpp
 	@g++ -o tests_Base.exe tests_Base.o -L./tests/gtest/build/lib -lgtest -pthread
@@ -46,5 +56,20 @@ testCBCTable:
 testCTRTable:
 	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_CTR.o ./tests/tests_CTR.cpp
 	@g++ -o tests_CTR.exe tests_CTR.o -L./tests/gtest/build/lib -lgtest -pthread
-	./tests_CTR`.exe
+	./tests_CTR.exe
+	rm *.o 
+testOFBTable:
+	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_OFB.o ./tests/tests_OFB.cpp
+	@g++ -o tests_OFB.exe tests_OFB.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_OFB.exe
+	rm *.o 
+testCFBTable:
+	@g++ -std=c++11 -DTABLE_REALIZATION -pthread -I./tests/gtest/include -c -o tests_CFB.o ./tests/tests_CFB.cpp
+	@g++ -o tests_CFB.exe tests_CFB.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_CFB.exe
+	rm *.o 
+testSHA256:
+	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_SHA256.o ./tests/tests_SHA256.cpp
+	@g++ -o tests_SHA256.exe tests_SHA256.o -L./tests/gtest/build/lib -lgtest -pthread
+	./tests_SHA256.exe
 	rm *.o 

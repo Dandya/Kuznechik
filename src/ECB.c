@@ -1,4 +1,4 @@
-#ifndef _KUZNECHIK_H
+#ifndef KUZNECHIK_H
 #include "../include/kuznechik.h"
 #endif
 
@@ -8,7 +8,7 @@
 /// @param key is pointer on block of memory of size 256 bit.
 /// @param mode_padding_nulls is function using which  bytes are padded in last block.
 /// @return 0 is good, -1 is key = NULL, -2 is error of read or write file.
-int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls) {
+int encryptECBKuz(FILE* input, FILE* output, vector128_t * key, int mode_padding_nulls) {
     if( key == NULL )                     { return -1; }
     if( input == NULL || output == NULL ) { return -2; }
     if( mode_padding_nulls != PROC_ADD_NULLS_1 && 
@@ -18,18 +18,18 @@ int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
     uint64_t size_input_file = getSizeFile(input);
     if( size_input_file == 0 ) { return 0; }
 
-    vector128bit iteration_keys[10];
+    vector128_t iteration_keys[10];
     int result = createIterationKeysKuz(key, iteration_keys);
     if( result < 0 ) { 
         fprintf(stderr, "error create iteration keys\n");
         return result; 
     }
 
-    vector128bit * buffer;
+    vector128_t * buffer;
     int buffer_size;
     if( size_input_file >= 1048576) { buffer_size = 1048576; } 
     else { buffer_size = 1024; }
-    buffer = (vector128bit *)malloc(buffer_size);
+    buffer = (vector128_t *)malloc(buffer_size);
     if( buffer == NULL ) { buffer_size = 0; }
 
     uint64_t count_blocks_in_buffer = buffer_size/SIZE_BLOCK;
@@ -54,7 +54,7 @@ int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
         }
         free(buffer);
     }
-    vector128bit block;
+    vector128_t block;
     uint64_t count_full_blocks = size_input_file/SIZE_BLOCK;
     for(iteration = count_full_buffers * count_blocks_in_buffer; iteration < count_full_blocks; iteration++) {
         if( fread(&block, SIZE_BLOCK, 1, input) != 1 ) {
@@ -100,7 +100,7 @@ int encryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
 ///     If mode_padding_nulls != PROC_ADD_NULLS_1 then this parameter is ignored.
 /// @return 0 is good, -1 is key = NULL, -2 is error of read or write file, 
 ///     -3 if using PROC_ADD_NULLS_1 and length_last_block > 16 or length_last_block <= 0.
-int decryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_padding_nulls, int length_last_block) {
+int decryptECBKuz(FILE* input, FILE* output, vector128_t * key, int mode_padding_nulls, int length_last_block) {
     if( key == NULL )                                        { return -1; }
     if( input == NULL || output == NULL )                    { return -2; }
     if( mode_padding_nulls == PROC_ADD_NULLS_1 && 
@@ -113,18 +113,18 @@ int decryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
     uint64_t size_input_file = getSizeFile(input);
     if( size_input_file == 0 ) { return 0; }
 
-    vector128bit iteration_keys[10];
+    vector128_t iteration_keys[10];
     int result = createIterationKeysKuz(key, iteration_keys);
     if( result < 0 ) { 
         fprintf(stderr, "error create iteration keys\n");
         return result; 
     }
 
-    vector128bit * buffer;
+    vector128_t * buffer;
     int buffer_size;
     if( size_input_file >= 1048576) { buffer_size = 1048576; } 
     else { buffer_size = 1024; }
-    buffer = (vector128bit *)malloc(buffer_size);
+    buffer = (vector128_t *)malloc(buffer_size);
     if( buffer == NULL ) { buffer_size = 0; }
 
     uint64_t count_blocks_in_buffer = buffer_size/SIZE_BLOCK;
@@ -150,7 +150,7 @@ int decryptECBKuz(FILE* input, FILE* output, vector128bit * key, int mode_paddin
         }
         free(buffer);
     }
-    vector128bit block;
+    vector128_t block;
     // in DECRYPT mode last full block decrypt using deletion of padding nulls 
     uint64_t count_blocks_for_decrypt = size_input_file/SIZE_BLOCK - 1;
     for(iteration = count_full_buffers * count_blocks_in_buffer; iteration < count_blocks_for_decrypt; iteration++) {

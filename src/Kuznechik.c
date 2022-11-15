@@ -1,4 +1,4 @@
-#ifndef _KUZNECHIK_H
+#ifndef KUZNECHIK_H
 #include "../include/kuznechik.h"
 #endif
 
@@ -59,7 +59,7 @@ static uint8_t mulGf256_matrix[16][256] = {
 /// @brief XOR with two block of memory.
 /// @param block is pointer on memory block with size of 128 bits.
 /// @param key is memory block with size of 128 bits.
-static void XOR(vector128bit * block, vector128bit key) {
+static void XOR(vector128_t * block, vector128_t key) {
     block->half[0] ^= key.half[0];
     block->half[1] ^= key.half[1];
 }
@@ -83,7 +83,7 @@ static uint8_t mulGF256(uint8_t x, uint8_t y) {
 /// @brief Function uses substitutions for crypt block
 /// @param block is pointer on block of memory of size 128bit.
 /// @param mode is ENCRYPT or DECRYPT.
-static void substitutionFunc(vector128bit * block, int mode) {
+static void substitutionFunc(vector128_t * block, int mode) {
     if(mode == ENCRYPT) {
         for(int i = 0; i < 16; i++) {
             block->bytes[i] = k_substitution_enc[block->bytes[i]];
@@ -98,7 +98,7 @@ static void substitutionFunc(vector128bit * block, int mode) {
 /// @brief Function uses multiple in GF(2^8) for crypt block and relocate bytes in vector.
 /// @param block is pointer on block of memory of size 128bit.
 /// @param mode is ENCRYPT or DECRYPT.
-static void relocateBytes(vector128bit * block, int mode) {
+static void relocateBytes(vector128_t * block, int mode) {
     uint8_t result = 0;
     if(mode == ENCRYPT) {
         for(int i = 0; i < 15; i++) {
@@ -135,7 +135,7 @@ static void relocateBytes(vector128bit * block, int mode) {
 /// @brief Function uses relocateBytes 16 times for cryption of all block.
 /// @param block is pointer on block of memory of size 128bit.
 /// @param mode is ENCRYPT or DECRYPT.
-static void linearFunc(vector128bit * block, int mode) {
+static void linearFunc(vector128_t * block, int mode) {
     for(int i = 0; i < 16; i++) {
         relocateBytes(block, mode);
     }
@@ -145,8 +145,8 @@ static void linearFunc(vector128bit * block, int mode) {
 /// @param key is value for creating keys.
 /// @param v_1 is pointer on block of memory of size 128bit.
 /// @param v_0 is pointer on block of memory of size 128bit.
-static void createTwoIterationKeys(vector128bit key, vector128bit * v_1, vector128bit * v_0) {
-    vector128bit tmp = *v_1;
+static void createTwoIterationKeys(vector128_t key, vector128_t * v_1, vector128_t * v_0) {
+    vector128_t tmp = *v_1;
     XOR(v_1, key);
     substitutionFunc(v_1, ENCRYPT);
     linearFunc(v_1, ENCRYPT);
@@ -156,15 +156,15 @@ static void createTwoIterationKeys(vector128bit key, vector128bit * v_1, vector1
 }
 
 /// @brief Function creates 10 iteration keys.
-/// @param key is array of 2 vector128bit or block of memory of size 256 bits.
-/// @param array_for_keys is pointer to 10 vector128bit or memory with size 160 bytes.
+/// @param key is array of 2 vector128_t or block of memory of size 256 bits.
+/// @param array_for_keys is pointer to 10 vector128_t or memory with size 160 bytes.
 /// @return 0 is good, -1 is key = NULL, -2 is array_for_keys = NULL.
-int createIterationKeysKuz(vector128bit * key, vector128bit * array_for_keys) {
+int createIterationKeysKuz(vector128_t * key, vector128_t * array_for_keys) {
     if(key == NULL)            { return -1; }
     if(array_for_keys == NULL) { return -2; }
     array_for_keys[0] = key[1];
     array_for_keys[1] = key[0];
-    vector128bit coeff;
+    vector128_t coeff;
     for(int i = 1; i <= 4; i++) {
         array_for_keys[2*i]   = array_for_keys[2*i-2];
         array_for_keys[2*i+1] = array_for_keys[2*i-1];
@@ -182,7 +182,7 @@ int createIterationKeysKuz(vector128bit * key, vector128bit * array_for_keys) {
 /// @param block is pointer of data in memory for enc. Size block is 16 bytes.
 /// @param arr_keys is array of iteration keys. Size of key is 128 bits.
 /// @return 0 is good, -1 is block = NULL, -2 is arr_keys = NULL. 
-int encryptBlockKuz(vector128bit * block, vector128bit * arr_keys) {
+int encryptBlockKuz(vector128_t * block, vector128_t * arr_keys) {
     if(block == NULL)                      { return -1; }
     if(arr_keys == NULL)                   { return -2; }
 
@@ -200,7 +200,7 @@ int encryptBlockKuz(vector128bit * block, vector128bit * arr_keys) {
 /// @param block is pointer of data in memory for enc. Size block is 16 bytes.
 /// @param arr_keys is array of iteration keys. Size of key is 128 bits.
 /// @return 0 is good, -1 is block = NULL, -2 is arr_keys = NULL. 
-int decryptBlockKuz(vector128bit * block, vector128bit * arr_keys) {
+int decryptBlockKuz(vector128_t * block, vector128_t * arr_keys) {
     if(block == NULL)                      { return -1; }
     if(arr_keys == NULL)                   { return -2; }
     
@@ -226,7 +226,7 @@ uint64_t getSizeFile(FILE* input) {
 }
 
 
-int readLastBlock(FILE* input, vector128bit * block, int mode_padding_nulls, uint8_t count_last_bytes) {
+int readLastBlock(FILE* input, vector128_t * block, int mode_padding_nulls, uint8_t count_last_bytes) {
     if( fread(block, count_last_bytes, 1, input)  != 1) { return -2; }
     procPaddingNulls((uint8_t *)block, SIZE_BLOCK - count_last_bytes, mode_padding_nulls);
     return 0;

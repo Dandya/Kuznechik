@@ -1,8 +1,8 @@
-#ifndef _KUZNECHIK_H
+#ifndef KUZNECHIK_H
 #include "../include/kuznechik.h"
 #endif
 
-static void addOne(vector128bit * a) {
+static void addOne(vector128_t * a) {
     static uint64_t tmp = a->half[0];
     a->half[0] += 1;
     if( tmp > a->half[0] ) { 
@@ -18,7 +18,7 @@ static void addOne(vector128bit * a) {
 /// @param size_register_in_bytes is size of register in bytes which is a multiple of 16.
 /// @param initial_vector is array which haves size of size_register_in_bytes and stores the random value.
 /// @return 0 is good, -1 is key = NULL, -2 is error of read or write file, -5 is.
-int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_in_bytes, vector128bit * initial_vector) {
+int encryptCTRKuz(FILE* input, FILE* output, vector128_t * key, int size_block_in_bytes, vector128_t * initial_vector) {
     if( key == NULL )                              { return -1; }
     if( input == NULL || output == NULL )          { return -2; }
     if( size_block_in_bytes > 16 || size_block_in_bytes <= 0 ) { return -3; }
@@ -28,17 +28,17 @@ int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_
     if( size_input_file == 0 ) { return 0; }
 
     
-    vector128bit iteration_keys[10];
+    vector128_t iteration_keys[10];
     int result = createIterationKeysKuz(key, iteration_keys);
     if( result < 0 ) { 
         fprintf(stderr, "error create iteration keys\n");
         return result; 
     }
 
-    vector128bit gamma;
+    vector128_t gamma;
     gamma.half[0] = 0;
     gamma.half[1] = initial_vector->half[0];
-    vector128bit gamma_for_encrypt;
+    vector128_t gamma_for_encrypt;
     int index_of_start = SIZE_BLOCK - size_block_in_bytes;
 
     uint8_t * buffer;
@@ -73,7 +73,7 @@ int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_
         }
         free(buffer);
     }
-    vector128bit block;
+    vector128_t block;
     uint64_t count_full_blocks = size_input_file/size_block_in_bytes;
     for(iteration = count_full_buffers * count_blocks_in_buffer; iteration < count_full_blocks; iteration++) {
         if( fread(&block, size_block_in_bytes, 1, input) != 1 ) {
@@ -112,6 +112,6 @@ int encryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_
     return 0;
 }
 
-int decryptCTRKuz(FILE* input, FILE* output, vector128bit * key, int size_block_in_bytes, vector128bit * initial_vector) {
+int decryptCTRKuz(FILE* input, FILE* output, vector128_t * key, int size_block_in_bytes, vector128_t * initial_vector) {
     return encryptCTRKuz(input, output, key, size_block_in_bytes, initial_vector);
 }

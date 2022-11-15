@@ -1,10 +1,12 @@
 #include "../src/Kuznechik.c"
 #include "./gtest/include/gtest/gtest.h"
 
-vector128bit v, result;
+vector128_t v, result;
+vector128_t key[2];
+vector128_t iteration_keys[10];
 
 TEST(Base, sizeVector) {
-    EXPECT_EQ(16, sizeof(vector128bit));
+    EXPECT_EQ(16, sizeof(vector128_t));
 }
 
 TEST(Base, substitutionFuncEncrypt) 
@@ -160,12 +162,6 @@ TEST(Base, linearFuncDecrypt){
 }
 
 TEST(Base, createKeys) {
-    vector128bit key[2];
-    key[0].half[0] = 0x0123456789abcdef;
-    key[0].half[1] = 0xfedcba9876543210;
-    key[1].half[0] = 0x0011223344556677;
-    key[1].half[1] = 0x8899aabbccddeeff;
-    vector128bit iteration_keys[10];
     createIterationKeysKuz(key, iteration_keys);
     //key 0
     EXPECT_EQ(0x0011223344556677, iteration_keys[0].half[0]);
@@ -200,35 +196,19 @@ TEST(Base, createKeys) {
 }
 
 TEST(Base, BlockEncryptKuz) {
-    vector128bit block;
-    block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700;
-    vector128bit key[2];
-    key[0].half[0] = 0x0123456789abcdef;
-    key[0].half[1] = 0xfedcba9876543210;
-    key[1].half[0] = 0x0011223344556677;
-    key[1].half[1] = 0x8899aabbccddeeff;
-    vector128bit iteration_keys[10];
-    createIterationKeysKuz(key, iteration_keys);
-    encryptBlockKuz(&block, iteration_keys);
-    EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
-    EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
+    v.half[0] = 0xffeeddccbbaa9988;
+    v.half[1] = 0x1122334455667700;
+    encryptBlockKuz(&v, iteration_keys);
+    EXPECT_EQ(0x5a468d42b9d4edcd, v.half[0]);
+    EXPECT_EQ(0x7f679d90bebc2430, v.half[1]);
 }
 
 TEST(Base, BlockDecryptKuz) {
-    vector128bit block;
-    block.half[0] = 0x5a468d42b9d4edcd;
-    block.half[1] = 0x7f679d90bebc2430;
-    vector128bit key[2];
-    key[0].half[0] = 0x0123456789abcdef;
-    key[0].half[1] = 0xfedcba9876543210;
-    key[1].half[0] = 0x0011223344556677;
-    key[1].half[1] = 0x8899aabbccddeeff;
-    vector128bit iteration_keys[10];
-    createIterationKeysKuz(key, iteration_keys);
-    decryptBlockKuz(&block, iteration_keys);
-    EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
-    EXPECT_EQ(0x1122334455667700, block.half[1]);
+    v.half[0] = 0x5a468d42b9d4edcd;
+    v.half[1] = 0x7f679d90bebc2430;
+    decryptBlockKuz(&v, iteration_keys);
+    EXPECT_EQ(0xffeeddccbbaa9988, v.half[0]);
+    EXPECT_EQ(0x1122334455667700, v.half[1]);
 }
 
 TEST(Base, SizeOfFile) {
@@ -240,7 +220,7 @@ TEST(Base, SizeOfFile) {
 }
 
 TEST(Base, paddingNullls) {
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0x1122334455667700;
     block.half[1] = 0x0000000000000000;
     procPaddingNulls((uint8_t *) &block, 9, PROC_ADD_NULLS_1);
@@ -253,7 +233,7 @@ TEST(Base, paddingNullls) {
 
 TEST(Base, ReadLastBlock) {
     FILE * file = fopen("test_text.txt", "r"); // watch test SizeOfFile
-    vector128bit block;
+    vector128_t block;
     readLastBlock(file, &block, PROC_ADD_NULLS_1, 10);
     EXPECT_EQ(0x3820003534333231, block.half[0]);
     EXPECT_EQ(0x000000000000410A, block.half[1]);
@@ -264,7 +244,7 @@ TEST(Base, ReadLastBlock) {
 }
 
 TEST(Base, CountForWrite) {
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0x3820003534333231;
     block.half[1] = 0x000000000001410A;
     EXPECT_EQ(10, getCountBytesInLastBlock((uint8_t*)&block));
@@ -281,6 +261,11 @@ TEST(Base, CountForWrite) {
 
 int main(int argc, char **argv)
 {
+    key[0].half[0] = 0x0123456789abcdef;
+    key[0].half[1] = 0xfedcba9876543210;
+    key[1].half[0] = 0x0011223344556677;
+    key[1].half[1] = 0x8899aabbccddeeff;
+    createIterationKeysKuz(key, iteration_keys);
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

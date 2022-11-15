@@ -1,9 +1,9 @@
-#ifndef _KUZNECHIK_H
+#ifndef KUZNECHIK_H
 #include "../include/kuznechik.h"
 #endif
 
-static vector128bit createHelpingKey(vector128bit * arr_keys, int number_of_keys) {
-    vector128bit key; 
+static vector128_t createHelpingKey(vector128_t * arr_keys, int number_of_keys) {
+    vector128_t key; 
     key.half[0] = 0; 
     key.half[1] = 0;
     encryptBlockKuz(&key, arr_keys);
@@ -33,7 +33,7 @@ static vector128bit createHelpingKey(vector128bit * arr_keys, int number_of_keys
     return key; // K_2
 }
 
-int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC) {
+int createMAC(FILE * input, uint8_t * MAC, vector128_t * key, uint8_t size_MAC) {
     if( key == NULL )                     { return -1; }
     if( MAC == NULL )                     { return -2; }
     if( input == NULL )                   { return -3; }
@@ -42,21 +42,21 @@ int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC)
     uint64_t size_input_file = getSizeFile(input);
     if( size_input_file == 0 ) { return 0; }
     
-    vector128bit iteration_keys[10];
+    vector128_t iteration_keys[10];
     int result = createIterationKeysKuz(key, iteration_keys);
     if( result < 0 ) { 
         fprintf(stderr, "Error create iteration keys\n");
         return result; 
     }
 
-    vector128bit * buffer;
+    vector128_t * buffer;
     int buffer_size;
     if( size_input_file >= 1048576) { buffer_size = 1048576; } 
     else { buffer_size = 1024; }
-    buffer = (vector128bit *)malloc(buffer_size);
+    buffer = (vector128_t *)malloc(buffer_size);
     if( buffer == NULL ) { buffer_size = 0; }
 
-    vector128bit imito;
+    vector128_t imito;
     imito.half[0] = 0;
     imito.half[1] = 0;    
     uint64_t count_blocks_in_buffer = buffer_size/SIZE_BLOCK;
@@ -79,7 +79,7 @@ int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC)
         }
         free(buffer);
     }
-    vector128bit block;
+    vector128_t block;
     int remainder = size_input_file % SIZE_BLOCK;
     // last iteration of algorithm creating imito uses last block
     uint64_t count_blocks_for_crypt = (remainder != 0) ? size_input_file/SIZE_BLOCK : size_input_file/SIZE_BLOCK - 1;
@@ -93,7 +93,7 @@ int createMAC(FILE * input, uint8_t * MAC, vector128bit * key, uint8_t size_MAC)
         encryptBlockKuz(&imito, iteration_keys);
     }
 
-    vector128bit helping_key;
+    vector128_t helping_key;
     if(remainder != 0) {
         result = readLastBlock(input, &block, PROC_ADD_NULLS_3, remainder);
         if( result == -2 ) { return -2; }

@@ -12,13 +12,13 @@ TEST(ECB, TestFromGOST) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     fwrite(&block, SIZE_BLOCK, 1, open_text);
@@ -90,13 +90,13 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -146,13 +146,13 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -203,13 +203,13 @@ TEST(ECB, PROC_ADD_NULLS_2_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -259,13 +259,13 @@ TEST(ECB, PROC_ADD_NULLS_2_not_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -316,13 +316,13 @@ TEST(ECB, PROC_ADD_NULLS_3_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -372,13 +372,13 @@ TEST(ECB, PROC_ADD_NULLS_3_not_full) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 10; i++) {
@@ -429,13 +429,13 @@ TEST(ECB, SpeedlessKb) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 50; i++) {
@@ -478,13 +478,13 @@ TEST(ECB, SpeedmoreKb) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 1000; i++) {
@@ -527,13 +527,13 @@ TEST(ECB, SpeedmoreMb) {
         return;
     }
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     for(int i = 0; i < 1000000; i++) {

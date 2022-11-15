@@ -4,15 +4,15 @@
 #include <sys/time.h>
 
 TEST(IMITO, creationKeys) {
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    vector128bit iteration_keys[10];
+    vector128_t iteration_keys[10];
     createIterationKeysKuz(key, iteration_keys);
 
-    vector128bit helping_key = createHelpingKey(iteration_keys, CREATE_KEY_1);
+    vector128_t helping_key = createHelpingKey(iteration_keys, CREATE_KEY_1);
     EXPECT_EQ(0x0de0573298151dc7, helping_key.half[0]);
     EXPECT_EQ(0x297d82bc4d39e3ca, helping_key.half[1]);
 
@@ -29,7 +29,7 @@ TEST(IMITO, creationMAC) {
         return;
     }
     
-    vector128bit block;
+    vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
     block.half[1] = 0x1122334455667700; 
     fwrite(&block, SIZE_BLOCK, 1, input_text);
@@ -44,7 +44,7 @@ TEST(IMITO, creationMAC) {
     fwrite(&block, SIZE_BLOCK, 1, input_text);
     fclose(input_text);
 
-    vector128bit key[2];
+    vector128_t key[2];
     key[0].half[0] = 0x0123456789abcdef;
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
