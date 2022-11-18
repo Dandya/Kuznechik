@@ -3,10 +3,11 @@
 #include "./gtest/include/gtest/gtest.h"
 #include <sys/time.h>
 
-TEST(ECB, TestFromGOST) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, TestFromGOST)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -17,25 +18,35 @@ TEST(ECB, TestFromGOST) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
+    block.half[1] = 0x1122334455667700;
     fwrite(&block, SIZE_BLOCK, 1, open_text);
     block.half[0] = 0x8899aabbcceeff0a;
-    block.half[1] = 0x0011223344556677; 
+    block.half[1] = 0x0011223344556677;
     fwrite(&block, SIZE_BLOCK, 1, open_text);
     block.half[0] = 0x99aabbcceeff0a00;
-    block.half[1] = 0x1122334455667788; 
+    block.half[1] = 0x1122334455667788;
     fwrite(&block, SIZE_BLOCK, 1, open_text);
     block.half[0] = 0xaabbcceeff0a0011;
-    block.half[1] = 0x2233445566778899; 
+    block.half[1] = 0x2233445566778899;
     fwrite(&block, SIZE_BLOCK, 1, open_text);
     fclose(open_text);
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
@@ -52,16 +63,16 @@ TEST(ECB, TestFromGOST) {
     fread(&block, SIZE_BLOCK, 1, close_text);
     EXPECT_EQ(0x3a02c4c5aa8ada98, block.half[0]);
     EXPECT_EQ(0xd0b09ccde830b9eb, block.half[1]);
-    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK + 1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     fclose(open_text);
     fclose(close_text);
-
 
     open_text = fopen("OpenText.txt", "r");
     fread(&block, SIZE_BLOCK, 1, open_text);
@@ -81,10 +92,11 @@ TEST(ECB, TestFromGOST) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_1_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_1_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -95,23 +107,35 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_1));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_1, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
@@ -122,12 +146,14 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_1, 16));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_1, 16, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -137,10 +163,11 @@ TEST(ECB, PROC_ADD_NULLS_1_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_1_not_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_1_not_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -151,11 +178,21 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fwrite(&block, 4, 1, open_text);
@@ -163,28 +200,32 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_1));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_1, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
     }
-    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK + 1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_1, 4));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_1, 4, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -194,10 +235,11 @@ TEST(ECB, PROC_ADD_NULLS_1_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_2_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_2_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -208,39 +250,53 @@ TEST(ECB, PROC_ADD_NULLS_2_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
     }
-    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK + 1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -250,10 +306,11 @@ TEST(ECB, PROC_ADD_NULLS_2_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_2_not_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_2_not_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -264,11 +321,21 @@ TEST(ECB, PROC_ADD_NULLS_2_not_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fwrite(&block, 4, 1, open_text);
@@ -276,28 +343,32 @@ TEST(ECB, PROC_ADD_NULLS_2_not_full) {
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
     }
-    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK + 1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -307,10 +378,11 @@ TEST(ECB, PROC_ADD_NULLS_2_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_3_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_3_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -321,23 +393,35 @@ TEST(ECB, PROC_ADD_NULLS_3_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_3));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_3, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
@@ -348,12 +432,14 @@ TEST(ECB, PROC_ADD_NULLS_3_full) {
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_3, 0));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_3, 0, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -363,10 +449,11 @@ TEST(ECB, PROC_ADD_NULLS_3_full) {
     fclose(open_text);
 }
 
-TEST(ECB, PROC_ADD_NULLS_3_not_full) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, PROC_ADD_NULLS_3_not_full)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -377,11 +464,21 @@ TEST(ECB, PROC_ADD_NULLS_3_not_full) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 10; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 10; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fwrite(&block, 4, 1, open_text);
@@ -389,28 +486,32 @@ TEST(ECB, PROC_ADD_NULLS_3_not_full) {
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_3));
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_3, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     close_text = fopen("CloseText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, close_text);
         EXPECT_EQ(0x5a468d42b9d4edcd, block.half[0]);
         EXPECT_EQ(0x7f679d90bebc2430, block.half[1]);
     }
-    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK+1, close_text));
+    EXPECT_EQ(SIZE_BLOCK, fread(&block, 1, SIZE_BLOCK + 1, close_text));
     EXPECT_NE(feof(close_text), 0);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_3, 0));
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_3, 0, size_input_file));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "r");
-    for(int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         fread(&block, SIZE_BLOCK, 1, open_text);
         EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
         EXPECT_EQ(0x1122334455667700, block.half[1]);
@@ -420,10 +521,11 @@ TEST(ECB, PROC_ADD_NULLS_3_not_full) {
     fclose(open_text);
 }
 
-TEST(ECB, SpeedlessKb) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, SpeedlessKb)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -434,45 +536,58 @@ TEST(ECB, SpeedlessKb) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 50; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 50; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
-    double size_text = (double)50*16; // Bytes
+    double size_text = (double)50 * 16; // Bytes
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    
+    size_input_file = getSizeFile(open_text);
+
     struct timeval t;
 
     gettimeofday(&t, NULL);
     double start = (double)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     gettimeofday(&t, NULL);
-    printf("Speed of encrypt: %lf MB/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of encrypt: %lf MB/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) + 1 - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
+    size_input_file = getSizeFile(close_text);
     gettimeofday(&t, NULL);
     start = (long long)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     gettimeofday(&t, NULL);
     size_text += 16;
-    printf("Speed of decrypt: %lf Mb/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of decrypt: %lf Mb/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) + 1 - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 }
 
-TEST(ECB, SpeedmoreKb) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, SpeedmoreKb)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -483,45 +598,58 @@ TEST(ECB, SpeedmoreKb) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 1000; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 1000; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
-    double size_text = (double)1000*16; // Bytes
+    double size_text = (double)1000 * 16; // Bytes
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    
+    size_input_file = getSizeFile(open_text);
+
     struct timeval t;
 
     gettimeofday(&t, NULL);
     double start = (double)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     gettimeofday(&t, NULL);
-    printf("Speed of encrypt: %lf MB/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of encrypt: %lf MB/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
+    size_input_file = getSizeFile(close_text);
     gettimeofday(&t, NULL);
     start = (long long)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     gettimeofday(&t, NULL);
     size_text += 16;
-    printf("Speed of decrypt: %lf Mb/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of decrypt: %lf Mb/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 }
 
-TEST(ECB, SpeedmoreMb) {
-    FILE * open_text = fopen("OpenText.txt", "w");
-    FILE * close_text;
-    if(open_text == NULL)
+TEST(ECB_TESTS, SpeedmoreMb)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
     {
         printf("Error of open file: %d\n", __LINE__);
         return;
@@ -532,43 +660,55 @@ TEST(ECB, SpeedmoreMb) {
     key[0].half[1] = 0xfedcba9876543210;
     key[1].half[0] = 0x0011223344556677;
     key[1].half[1] = 0x8899aabbccddeeff;
-    
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
     vector128_t block;
     block.half[0] = 0xffeeddccbbaa9988;
-    block.half[1] = 0x1122334455667700; 
-    for(int i = 0; i < 1000000; i++) {
+    block.half[1] = 0x1122334455667700;
+    for (int i = 0; i < 1000000; i++)
+    {
         fwrite(&block, SIZE_BLOCK, 1, open_text);
     }
     fclose(open_text);
-    double size_text = (double)1000000*16; // Bytes
+    double size_text = (double)1000000 * 16; // Bytes
 
     open_text = fopen("OpenText.txt", "r");
     close_text = fopen("CloseText.txt", "w");
-    
+    size_input_file = getSizeFile(open_text);
+
     struct timeval t;
 
     gettimeofday(&t, NULL);
     double start = (double)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, key, PROC_ADD_NULLS_2));
+    EXPECT_EQ(0, encryptECBKuz(open_text, close_text, iteration_keys, PROC_ADD_NULLS_2, size_input_file));
     gettimeofday(&t, NULL);
-    printf("Speed of encrypt: %lf MB/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of encrypt: %lf MB/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 
     open_text = fopen("OpenText.txt", "w");
     close_text = fopen("CloseText.txt", "r");
+    size_input_file = getSizeFile(close_text);
     gettimeofday(&t, NULL);
     start = (long long)t.tv_sec * 1000 + t.tv_usec / 1000;
-    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, key, PROC_ADD_NULLS_2, 0));
+    EXPECT_EQ(0, decryptECBKuz(close_text, open_text, iteration_keys, PROC_ADD_NULLS_2, 0, size_input_file));
     gettimeofday(&t, NULL);
     size_text += 16;
-    printf("Speed of decrypt: %lf Mb/sec\n", size_text*1000/((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start)*1024*1024));
+    printf("Speed of decrypt: %lf Mb/sec\n", size_text * 1000 / ((((double)t.tv_sec * 1000 + t.tv_usec / 1000) - start) * 1024 * 1024));
     fclose(open_text);
     fclose(close_text);
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -73,3 +73,5 @@ testSHA256:
 	@g++ -o tests_SHA256.exe tests_SHA256.o -L./tests/gtest/build/lib -lgtest -pthread
 	./tests_SHA256.exe
 	rm *.o 
+testAllTable:
+	make testBaseTable testECBTable testIMITOTable testCBCTable testCTRTable testOFBTable testCBCTable
