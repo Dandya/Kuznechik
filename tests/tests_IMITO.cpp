@@ -68,6 +68,42 @@ TEST(IMITO_TESTS, creationMAC)
     fclose(input_text);
 }
 
+TEST(IMITO_TESTS, SmallBlock)
+{
+    FILE *input_text = fopen("OpenText.txt", "w");
+    if (input_text == NULL)
+    {
+        printf("Error of open file: %d\n", __LINE__);
+        return;
+    }
+
+    vector128_t key[2];
+    key[0].half[0] = 0x0123456789abcdef;
+    key[0].half[1] = 0xfedcba9876543210;
+    key[1].half[0] = 0x0011223344556677;
+    key[1].half[1] = 0x8899aabbccddeeff;
+
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
+    vector128_t block;
+    block.half[0] = 0xffeeddccbbaa9988;
+    block.half[1] = 0x1122334455667700;
+    fwrite(&block, 8, 1, input_text);
+    fclose(input_text);
+
+    input_text = fopen("OpenText.txt", "r");
+    uint64_t size_input_file = getSizeFile(input_text);
+    uint64_t MAC;
+    EXPECT_EQ(0, createMAC(input_text, (uint8_t *)&MAC, iteration_keys, 64, size_input_file));
+    fclose(input_text);
+}
+
 TEST(IMITO_TESTS, SpeedlessKb)
 {
     FILE *open_text = fopen("OpenText.txt", "w");

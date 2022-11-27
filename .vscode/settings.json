@@ -6,6 +6,8 @@
         "array": "c",
         "string": "c",
         "string_view": "c",
-        "kuznechik.h": "c"
+        "kuznechik.h": "c",
+        "dirent.h": "c",
+        "stat.h": "c"
     }
 }

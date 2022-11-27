@@ -184,6 +184,65 @@ TEST(CTR_TESTS, TestOnNotFullLastBlock)
     fclose(open_text);
 }
 
+TEST(CTR_TESTS, SmallBlock)
+{
+    FILE *open_text = fopen("OpenText.txt", "w");
+    FILE *close_text;
+    if (open_text == NULL)
+    {
+        printf("Error of open file: %d\n", __LINE__);
+        return;
+    }
+
+    vector128_t initial_vector;
+    initial_vector.half[0] = 0x1234567890abcef0;
+
+    vector128_t key[2];
+    key[0].half[0] = 0x0123456789abcdef;
+    key[0].half[1] = 0xfedcba9876543210;
+    key[1].half[0] = 0x0011223344556677;
+    key[1].half[1] = 0x8899aabbccddeeff;
+
+    uint64_t size_input_file;
+    vector128_t iteration_keys[10];
+    int result = createIterationKeysKuz(key, iteration_keys);
+    if (result < 0)
+    {
+        fprintf(stderr, "Error create iteration keys\n");
+        return;
+    }
+
+    vector128_t block;
+    block.half[0] = 0xffeeddccbbaa9988;
+    block.half[1] = 0x1122334455667700;
+    fwrite(&block, 8, 1, open_text);
+    fclose(open_text);
+
+    open_text = fopen("OpenText.txt", "r");
+    close_text = fopen("CloseText.txt", "w");
+    size_input_file = getSizeFile(open_text);
+    EXPECT_EQ(0, encryptCTRKuz(open_text, close_text, iteration_keys, 16, &initial_vector, size_input_file));
+    fclose(open_text);
+    fclose(close_text);
+
+    close_text = fopen("CloseText.txt", "r");
+    EXPECT_EQ(8, getSizeFile(close_text));
+    fclose(close_text);
+
+    open_text = fopen("OpenText.txt", "w");
+    close_text = fopen("CloseText.txt", "r");
+    size_input_file = getSizeFile(close_text);
+    EXPECT_EQ(0, decryptCTRKuz(close_text, open_text, iteration_keys, 16, &initial_vector, size_input_file));
+    fclose(open_text);
+    fclose(close_text);
+
+    open_text = fopen("OpenText.txt", "r");
+    EXPECT_EQ(8, getSizeFile(open_text));
+    fread(&block, 8, 1, open_text);
+    EXPECT_EQ(0xffeeddccbbaa9988, block.half[0]);
+    fclose(open_text);
+}
+
 TEST(CTR_TESTS, SpeedlessKb)
 {
     FILE *open_text = fopen("OpenText.txt", "w");

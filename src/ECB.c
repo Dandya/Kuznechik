@@ -136,7 +136,7 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
     }
     if (iteration_keys == NULL)
     {
-        fprintf(stderr, "Fatal error in encryptECBKuz: iteration keys is NULL\n");
+        fprintf(stderr, "Fatal error in decryptECBKuz: iteration keys is NULL\n");
         return -2;
     }
     if (mode_padding_nulls == PROC_ADD_NULLS_1 &&
@@ -182,7 +182,7 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
         {
             if (fread(buffer, buffer_size, 1, input) != 1)
             {
-                fprintf(stderr, "%d: Error in fread\n", __LINE__);
+                fprintf(stderr, "%d: Error in fread in decryptECBKuz\n", __LINE__);
                 free(buffer);
                 return -1;
             }
@@ -192,7 +192,7 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
             }
             if (fwrite(buffer, buffer_size, 1, output) != 1)
             {
-                fprintf(stderr, "%d: Error in fwrite\n", __LINE__);
+                fprintf(stderr, "%d: Error in fwrite in decryptECBKuz\n", __LINE__);
                 free(buffer);
                 return -1;
             }
@@ -201,18 +201,18 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
     }
     vector128_t block;
     // in DECRYPT mode last full block decrypt using deletion of padding nulls
-    uint64_t count_blocks_for_decrypt = size_input_file / SIZE_BLOCK - 1;
+    uint64_t count_blocks_for_decrypt = (size_input_file > SIZE_BLOCK) ? size_input_file / SIZE_BLOCK - 1 : 0;
     for (iteration = count_full_buffers * count_blocks_in_buffer; iteration < count_blocks_for_decrypt; iteration++)
     {
         if (fread(&block, SIZE_BLOCK, 1, input) != 1)
         {
-            fprintf(stderr, "%d: Error in fread\n", __LINE__);
+            fprintf(stderr, "%d: Error in fread in decryptECBKuz\n", __LINE__);
             return -1;
         }
         decryptBlockKuz(&block, iteration_keys);
         if (fwrite(&block, SIZE_BLOCK, 1, output) != 1)
         {
-            fprintf(stderr, "%d: Error in fwrite\n", __LINE__);
+            fprintf(stderr, "%d: Error in fwrite in decryptECBKuz\n", __LINE__);
             return -1;
         }
     }
@@ -220,7 +220,7 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
     int result = 0;
     if (fread(&block, SIZE_BLOCK, 1, input) != 1)
     {
-        fprintf(stderr, "%d: Error in fread\n", __LINE__);
+        fprintf(stderr, "%d: Error in fread in decryptECBKuz\n", __LINE__);
         return -1;
     }
     decryptBlockKuz(&block, iteration_keys);
@@ -236,7 +236,7 @@ int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
     {
         if (fwrite(&block, result, 1, output) != 1)
         {
-            fprintf(stderr, "%d: Error in fwrite\n", __LINE__);
+            fprintf(stderr, "%d: Error in fwrite in decryptECBKuz\n", __LINE__);
             return -1;
         }
     }

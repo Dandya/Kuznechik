@@ -108,7 +108,11 @@ int createMAC(FILE *input, uint8_t *MAC, vector128_t *iteration_keys, uint8_t si
     vector128_t block;
     int remainder = size_input_file % SIZE_BLOCK;
     // last iteration of algorithm creating imito uses last block
-    uint64_t count_blocks_for_crypt = (remainder != 0) ? size_input_file / SIZE_BLOCK : size_input_file / SIZE_BLOCK - 1;
+    uint64_t count_blocks_for_crypt = (remainder != 0)
+                                          ? size_input_file / SIZE_BLOCK
+                                      : (size_input_file >= SIZE_BLOCK)
+                                          ? size_input_file / SIZE_BLOCK - 1
+                                          : 0;
     for (iteration = count_buffers_for_crypt * count_blocks_in_buffer; iteration < count_blocks_for_crypt; iteration++)
     {
         if (fread(&block, SIZE_BLOCK, 1, input) != 1)

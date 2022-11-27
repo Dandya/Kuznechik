@@ -259,7 +259,7 @@ int decryptCBCKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
     }
     vector128_t block;
     // in DECRYPT mode last full block decrypt using deletion of padding nulls
-    uint64_t count_blocks_for_decrypt = size_input_file / SIZE_BLOCK - 1;
+    uint64_t count_blocks_for_decrypt = (size_input_file > SIZE_BLOCK) ? size_input_file / SIZE_BLOCK - 1 : 0;
     for (iteration = count_full_buffers * count_blocks_in_buffer; iteration < count_blocks_for_decrypt; iteration++)
     {
         if (fread(&block, SIZE_BLOCK, 1, input) != 1)

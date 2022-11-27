@@ -40,8 +40,8 @@
 
 typedef union
 {
-    uint8_t bytes[16];
     uint64_t half[2];
+    uint8_t bytes[16];
 } vector128_t;
 
 /// Functions from Kuznechik.c
@@ -55,6 +55,8 @@ uint8_t getCountBytesInLastBlock(uint8_t *block);
 // Functions from ECB.c
 int encryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mode_padding_nulls, uint64_t size_input_file);
 int decryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mode_padding_nulls, int length_last_block, uint64_t size_input_file);
+int encryptStrECBKuz(uint8_t *input, uint8_t *output, vector128_t *iteration_keys, int mode_padding_nulls, uint64_t size_input_file);
+int decryptStrECBKuz(uint8_t *input, uint8_t *output, vector128_t *iteration_keys, int mode_padding_nulls, int length_last_block, uint64_t size_input_file);
 // Functions from CBC.c
 int encryptCBCKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mode_padding_nulls, int size_register_in_bytes, vector128_t *initial_vector, uint64_t size_input_file);
 int decryptCBCKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mode_padding_nulls, int length_last_block, int size_register_in_bytes, vector128_t *initial_vector, uint64_t size_input_file);

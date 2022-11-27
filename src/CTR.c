@@ -2,7 +2,7 @@
 
 static void addOne(vector128_t *a)
 {
-    static uint64_t tmp = a->half[0];
+    uint64_t tmp = a->half[0];
     a->half[0] += 1;
     if (tmp > a->half[0])
     {

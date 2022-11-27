@@ -1,3 +1,8 @@
+all: crypto.exe
+
+crypto.exe:
+	@gcc ./src/main.c -o crypto.exe
+
 testBase:
 	@g++ -std=c++11 -pthread -I./tests/gtest/include -c -o tests_Base.o ./tests/tests_Base.cpp
 	@g++ -o tests_Base.exe tests_Base.o -L./tests/gtest/build/lib -lgtest -pthread
