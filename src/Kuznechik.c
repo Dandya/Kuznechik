@@ -255,7 +255,7 @@ int decryptBlockKuz(vector128_t *block, vector128_t *arr_keys)
 }
 
 /// @brief Function return size of file.
-/// @param input is pointer of structure which defines file.
+/// @param input is pointer of structure which defines file opened for reading.
 /// @return size of file.
 uint64_t getSizeFile(FILE *input)
 {
@@ -266,6 +266,12 @@ uint64_t getSizeFile(FILE *input)
     return size;
 }
 
+/// @brief Function read @count_last_bytes from @input and adding SIZE_BLOCK-@count_last_bytes in @block, using procedure @mode_padding_nulls
+/// @param input is pointer of structure which defines file opened for reading.
+/// @param block is pointer of memory with size of 128 bits.
+/// @param mode_padding_nulls is number of procedure of padding nulls [PROC_ADD_NULLS_1, PROC_ADD_NULLS_2, PROC_ADD_NULLS_3].
+/// @param count_last_bytes is count bytes to read from @input;
+/// @return 0 is good,-2 if error of read.
 int readLastBlock(FILE *input, vector128_t *block, int mode_padding_nulls, uint8_t count_last_bytes)
 {
     if (fread(block, count_last_bytes, 1, input) != 1)
@@ -276,6 +282,10 @@ int readLastBlock(FILE *input, vector128_t *block, int mode_padding_nulls, uint8
     return 0;
 }
 
+/// @brief Function add bytes using special procedure in block @data.
+/// @param data is pointer to memory with size of 128 bits.
+/// @param count_adding_bytes is count of bytes from 1 to SIZE_BLOCK-1. 
+/// @param mode is number of procedure of padding nulls.
 void procPaddingNulls(uint8_t *data, int count_adding_bytes, int mode)
 {
     if (mode == PROC_ADD_NULLS_1)
@@ -295,6 +305,9 @@ void procPaddingNulls(uint8_t *data, int count_adding_bytes, int mode)
     }
 }
 
+/// @brief Function return originaly count of bytes in block before working of procPaddingNulls.
+/// @param data is pointer to memory with size of 128 bits.
+/// @return count from 1 to SIZE_BLOCK.
 uint8_t getCountBytesInLastBlock(uint8_t *block)
 {
     int index = SIZE_BLOCK - 1;
@@ -306,5 +319,5 @@ uint8_t getCountBytesInLastBlock(uint8_t *block)
     {
         return 16;
     }
-    return index; // count bytes in open text
+    return index;
 }

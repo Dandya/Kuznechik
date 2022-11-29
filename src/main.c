@@ -279,7 +279,7 @@ int main(int argc, char **argv)
         }
         case -1:
         {
-            fprintf(stderr, "Fatal error: invalid parameter\n");
+            fprintf(stderr, "Fatal error: invalid parameter: %s\n", argv[index]);
             return 2;
         }
         }
@@ -368,7 +368,7 @@ int main(int argc, char **argv)
                 }
                 return 3;
             }
-
+            free(header_cryptofile);
             String path;
             String name;
             uint64_t size_file;
@@ -438,6 +438,8 @@ int main(int argc, char **argv)
 
                     printf("Directory: %s\n", name.value);
                     result = writeDirectory(path, name, cryptofile);
+                    free(name.value);
+                    free(path.value);
                     if (result != 0)
                     {
                         fprintf(stderr, "Fatal error: error of writing directory: %d\n", __LINE__);
@@ -452,7 +454,7 @@ int main(int argc, char **argv)
                 }
                 }
             }
-
+            
             fclose(cryptofile);
         } // mode_encryption == IMITO
         else
@@ -479,12 +481,12 @@ int main(int argc, char **argv)
     {
         if (count_names > 1)
         {
-            printf("Will be decrypted only %s", argv[index_begining_names]);
+            printf("Will be decrypted only %s\n", argv[index_begining_names]);
         }
         FILE *cryptofile = fopen(argv[index_begining_names], "rb");
         if (cryptofile == NULL)
         {
-            fprintf(stderr, "Fatal error: error of opening %s : %d", output_name, __LINE__);
+            fprintf(stderr, "Fatal error: error of opening %s : %d\n", argv[index_begining_names], __LINE__);
             free(iteration_keys);
             return 3;
         }
@@ -501,6 +503,12 @@ int main(int argc, char **argv)
         mode_padding_nulls = header_cryptofile[5];
         size_block_in_bytes = header_cryptofile[6];
         size_register_in_bytes = *(((uint32_t *)header_cryptofile) + 2);
+        if( size_header_cryptofile != size_register_in_bytes + 16 )
+        {
+            printf("Uncorrect key\n");
+            free(iteration_keys);
+            return 0;
+        }
         initial_vector = (vector128_t *)malloc(size_register_in_bytes);
         if (initial_vector == NULL)
         {
@@ -534,26 +542,9 @@ int main(int argc, char **argv)
         {
             fprintf(stderr, "Fatal error: error of readCryptofile\n");
         }
+        free(absolute_path.value);
         fclose(cryptofile);
     }
-
-    // for (int i = index_begining_names; i < index_begining_names + count_names; i++)
-    // {
-    //     switch (getTypeFile(argv[i]))
-    //     {
-    //         case REG:
-    //         {
-    //             printf("File: %s\n", argv[i]);
-    //             break;
-    //         }
-    //         case DIR:
-    //         {
-    //             printf("Directory: %s\n", argv[i]);
-    //             break;
-    //         }
-    //     }
-
-    // }
 
     free(iteration_keys);
     if (initial_vector != NULL)
@@ -1084,6 +1075,7 @@ int readHeader(FILE *input, struct header *header)
     int result = fread(data, 1, 304, input);
     if (result != 304)
     {
+        free(data);
         return -1;
     }
     for (int i = 0; i < 19; i++) // 19 is 304/SIZE_BLOCK
@@ -1148,7 +1140,7 @@ int readCryptofile(FILE *input, String path)
                 return -1;
             }
         }
-        fprintf(stderr, "Read header: %s\n", header.name);
+        printf("Read header: %s\n", header.name);
         if (header.type == 'd')
         {
             name.value = header.name;
@@ -1204,6 +1196,7 @@ int readCryptofile(FILE *input, String path)
             {
                 fprintf(stderr, "Fatal error: hash sums don't equals for %s\n", header.name);
             }
+            fclose(file);
             free(new_path.value);
         }
         else

@@ -1,5 +1,11 @@
 #include "../include/kuznechik.h"
 
+/// @brief Function returns 128 higher bits of register.
+/// @param regist pointer on register with size @size_register_in_bytes
+/// @param size_regist_in_bytes size of register in bytes from SIZE_BLOCK. 
+/// @param index_gamma_in_register index of gamma in register.
+/// @param size_block_in_bytes size of block of data for encrypt in bytes from 1 to 16.
+/// @return block of memory with size 128 bits.
 static vector128_t getBlock(uint8_t *regist, int size_regist_in_bytes, int index_gamma_in_register, int size_block_in_bytes)
 {
     vector128_t block128bit;
@@ -15,6 +21,16 @@ static vector128_t getBlock(uint8_t *regist, int size_regist_in_bytes, int index
     return block128bit;
 }
 
+/// @brief Function encrypt file and write result using CFB algorithm from GOST 34.13-2018.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param output pointer of structure which defines file opened for writing.
+/// @param iteration_keys pointer on block of memory with ten iteration keys.
+/// @param size_block_in_bytes size of block of data for encrypt in bytes from 1 to 16.
+/// @param size_register_in_bytes size of register in bytes which is used for encrypt and don't equal null.
+/// @param initial_vector pointer on memory with size 256 bits.
+/// @param size_input_file size of input file in bytes.
+/// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL,
+///     -3 if bad @size_block_in_bytes, -4 if bad @size_register_in_bytes, -5 if initial_vector == NULL.
 int encryptCFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int size_block_in_bytes,
                   int size_register_in_bytes, uint8_t *initial_vector, uint64_t size_input_file)
 {
@@ -169,6 +185,16 @@ int encryptCFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int si
     return 0;
 }
 
+/// @brief Function decrypt file and write result using CFB algorithm from GOST 34.13-2018.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param output pointer of structure which defines file opened for writing.
+/// @param iteration_keys pointer on block of memory with ten iteration keys.
+/// @param size_block_in_bytes size of block of data for encrypt in bytes from 1 to 16.
+/// @param size_register_in_bytes size of register in bytes which is used for encrypt and don't equal null.
+/// @param initial_vector pointer on memory with size 256 bits.
+/// @param size_input_file size of input file in bytes.
+/// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL,
+///     -3 if bad @size_block_in_bytes, -4 if bad @size_register_in_bytes, -5 if initial_vector == NULL.
 int decryptCFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int size_block_in_bytes,
                   int size_register_in_bytes, uint8_t *initial_vector, uint64_t size_input_file)
 {

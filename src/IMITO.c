@@ -1,5 +1,9 @@
 #include "../include/kuznechik.h"
 
+/// @brief Function create first or second helping key for last interation algoritm of creating MAC.
+/// @param arr_keys pointer on block of memory with ten iteration keys.
+/// @param number_of_keys number of helping key [CREATE_KEY_1, CREATE_KEY_2].
+/// @return helping key - vector of 128 bits.
 static vector128_t createHelpingKey(vector128_t *arr_keys, int number_of_keys)
 {
     vector128_t key;
@@ -21,7 +25,7 @@ static vector128_t createHelpingKey(vector128_t *arr_keys, int number_of_keys)
     }
     if (number_of_keys == CREATE_KEY_1)
     {
-        return key; // K_1
+        return key; // first key
     }
     // CREATE_KEY_2
     if (((key.half[1] & ((uint64_t)1 << 63)) >> 63) == 0)
@@ -36,9 +40,17 @@ static vector128_t createHelpingKey(vector128_t *arr_keys, int number_of_keys)
         key.half[0] = (key.half[0] << 1) ^ 0b10000111;
         key.half[1] = key.half[1] << 1 | tmp;
     }
-    return key; // K_2
+    return key; // secong key
 }
 
+/// @brief Function creates MAC with size @size_MAC.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param MAC pointer on block of memory of size size_MAC/8+1.
+/// @param iteration_keys pointer on block of memory with ten iteration keys.
+/// @param size_MAC size of MAC in bits from 0 to 128.
+/// @param size_input_file size of input file in bytes.
+/// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL,
+///     -3 is MAC == NULL, -4 if size_MAC don't include in [0, 128].
 int createMAC(FILE *input, uint8_t *MAC, vector128_t *iteration_keys, uint8_t size_MAC, uint64_t size_input_file)
 {
     if (input == NULL)

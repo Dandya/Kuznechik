@@ -1,10 +1,10 @@
 #include "../include/kuznechik.h"
 
 /// @brief Function encrypt file and write result using ECB algorithm from GOST 34.13-2018. Standart use PROC_PADDING_NULLS_2.
-/// @param input pointer of structure which defines file.
-/// @param output pointer of structure which defines file.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param output pointer of structure which defines file opened for writing.
 /// @param iteration_keys pointer on block of memory with ten iteration keys.
-/// @param mode_padding_nulls function using which  bytes are padded in last block.
+/// @param mode_padding_nulls is number of procedure of padding nulls [PROC_ADD_NULLS_1, PROC_ADD_NULLS_2, PROC_ADD_NULLS_3].
 /// @param size_input_file size of input file in bytes.
 /// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL.
 int encryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mode_padding_nulls, uint64_t size_input_file)
@@ -119,10 +119,10 @@ int encryptECBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int mo
 }
 
 /// @brief Function decrypt file and write result using ECB algorithm from GOST 34.13-2018. Standart use PROC_ADD_NULLS_2.
-/// @param input is pointer of structure which defines file.
-/// @param output is pointer of structure which defines file.
+/// @param input is pointer of structure which defines file opened for reading.
+/// @param output is pointer of structure which defines file opened for writing.
 /// @param iteration_keys pointer on block of memory with ten iteration keys.
-/// @param mode_padding_nulls is function using which  bytes are padded in last block.
+/// @param mode_padding_nulls is number of procedure of padding nulls [PROC_ADD_NULLS_1, PROC_ADD_NULLS_2, PROC_ADD_NULLS_3].
 /// @param length_last_block is count of bytes in last block for PROC_ADD_NULLS_1.
 ///     If mode_padding_nulls != PROC_ADD_NULLS_1 then this parameter is ignored.
 /// @param size_input_file size of input file in bytes.

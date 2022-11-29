@@ -1,5 +1,15 @@
 #include "../include/kuznechik.h"
 
+/// @brief Function encrypt file and write result using OFB algorithm from GOST 34.13-2018.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param output pointer of structure which defines file opened for writing.
+/// @param iteration_keys pointer on block of memory with ten iteration keys.
+/// @param size_block_in_bytes size of block of data for encrypt in bytes from 1 to 16.
+/// @param size_register_in_bytes size of register multiple SIZE_BLOCK in bytes which is used for encrypt and don't equal null.
+/// @param initial_vector pointer on memory with size 256 bits.
+/// @param size_input_file size of input file in bytes.
+/// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL,
+///     -3 if bad @size_block_in_bytes, -4 if bad @size_register_in_bytes, -5 if initial_vector == NULL.
 int encryptOFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int size_block_in_bytes,
                   int size_register_in_bytes, vector128_t *initial_vector, uint64_t size_input_file)
 {
@@ -151,6 +161,16 @@ int encryptOFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int si
     return 0;
 }
 
+/// @brief Function decrypt file and write result using OFB algorithm from GOST 34.13-2018.
+/// @param input pointer of structure which defines file opened for reading.
+/// @param output pointer of structure which defines file opened for writing.
+/// @param iteration_keys pointer on block of memory with ten iteration keys.
+/// @param size_block_in_bytes size of block of data for encrypt in bytes from 1 to 16.
+/// @param size_register_in_bytes size of register multiple SIZE_BLOCK in bytes which is used for encrypt and don't equal null.
+/// @param initial_vector pointer on memory with size 256 bits.
+/// @param size_input_file size of input file in bytes.
+/// @return 0 is good, -1 is error of read or write file, -2 is iteration_keys == NULL,
+///     -3 if bad @size_block_in_bytes, -4 if bad @size_register_in_bytes, -5 if initial_vector == NULL.
 int decryptOFBKuz(FILE *input, FILE *output, vector128_t *iteration_keys, int size_block_in_bytes,
                   int size_register_in_bytes, vector128_t *initial_vector, uint64_t size_input_file)
 {
