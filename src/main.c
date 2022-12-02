@@ -44,7 +44,7 @@ int parameterDefinition(char *prm);
 int strEQ(char *strFirst, char *strSecond);
 int modeDefinition(char *mode);
 int createInitialVector();
-int getTypeFile(char *path);
+int getTypeFile(String path);
 char *createHeaderCryptofile(uint32_t *size);
 int encryptFile(FILE *input, FILE *output, uint64_t size_input_file);
 int decryptFile(FILE *input, FILE *output, uint64_t size_input_file, uint8_t length_last_block);
@@ -57,10 +57,11 @@ String getName(String path);
 String getAbsolutePath(char *path);
 int readHeader(FILE *input, struct header *header);
 int createDirectory(char *path, int mode);
-int readCryptofile(FILE *input, String path);
+int readCryptofile(FILE *input, String path, uint64_t size);
 int printMACFile(char *path);
 int printMACDirectory(char *path);
 
+// settings for working
 vector128_t *iteration_keys;
 vector128_t *initial_vector;
 int mode_encryption;
@@ -70,7 +71,7 @@ int size_block_in_bytes;
 uint8_t *MAC;
 uint8_t size_MAC;
 
-/// @brief
+/// @brief The program encrypts input files and directories and saves the result into one file. 
 /// Parameters:
 /// *  -i names of input files or/and directores for encryption and name of cryptofile for decryption #1
 /// *  -o name of output cryptofile for encryption or name of directory with decrypted files or/and directores for decryption #2
@@ -115,7 +116,7 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -i\n");
+                fprintf(stderr, "Empty parameter -i\n");
                 return 2;
             }
             index_begining_names = index;
@@ -130,7 +131,7 @@ int main(int argc, char **argv)
             }
             if (count_names == 0)
             {
-                fprintf(stderr, "Fatal error: empty parameter -i\n");
+                fprintf(stderr, "Empty parameter -i\n");
                 return 2;
             }
             index--;
@@ -141,13 +142,13 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -o\n");
+                fprintf(stderr, "Empty parameter -o\n");
                 return 2;
             }
             output_name = argv[index];
             if (parameterDefinition(output_name) != -1)
             {
-                fprintf(stderr, "Fatal error: empty parameter -o\n");
+                fprintf(stderr, "Empty parameter -o\n");
                 return 2;
             }
             break;
@@ -157,13 +158,13 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -k\n");
+                fprintf(stderr, "Empty parameter -k\n");
                 return 2;
             }
             key_str = argv[index];
             if (parameterDefinition(key_str) != -1)
             {
-                fprintf(stderr, "Fatal error: empty parameter -k\n");
+                fprintf(stderr, "Empty parameter -k\n");
                 return 2;
             }
             break;
@@ -173,13 +174,13 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -m\n");
+                fprintf(stderr, "Empty parameter -m\n");
                 return 2;
             }
             mode_encryption = modeDefinition(argv[index]);
             if (mode_encryption == 0)
             {
-                fprintf(stderr, "Fatal error: unknown mode in parameter -m\n");
+                fprintf(stderr, "Unknown mode in parameter -m\n");
                 return 2;
             }
             break;
@@ -189,13 +190,13 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -p\n");
+                fprintf(stderr, "Empty parameter -p\n");
                 return 2;
             }
             mode_padding_nulls = *(argv[index]) - '0';
             if (mode_padding_nulls < 1 || mode_padding_nulls > 3)
             {
-                fprintf(stderr, "Fatal error: invalid mode of padding block\n");
+                fprintf(stderr, "Invalid mode of padding block\n");
                 return 2;
             }
             break;
@@ -205,7 +206,7 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -c\n");
+                fprintf(stderr, "Empty parameter -c\n");
                 return 2;
             }
             mode = *(argv[index]);
@@ -219,7 +220,7 @@ int main(int argc, char **argv)
             }
             else
             {
-                fprintf(stderr, "Fatal error: invalid mode encrypt or decrypt\n");
+                fprintf(stderr, "Invalid mode encrypt or decrypt\n");
                 return 2;
             }
             break;
@@ -229,13 +230,13 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -s\n");
+                fprintf(stderr, "Empty parameter -s\n");
                 return 2;
             }
             size_MAC = (uint8_t)atoi(argv[index]);
             if (size_MAC > 128 || size_MAC < 1)
             {
-                fprintf(stderr, "Fatal error: invalid size MAC\n");
+                fprintf(stderr, "Invalid size MAC\n");
                 return 2;
             }
             break;
@@ -245,41 +246,41 @@ int main(int argc, char **argv)
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -s\n");
+                fprintf(stderr, "Empty parameter -s\n");
                 return 2;
             }
             size_register_in_bytes = (uint8_t)atoi(argv[index]);
             if (size_register_in_bytes <= 0 || size_register_in_bytes % SIZE_BLOCK != 0)
             {
-                fprintf(stderr, "Fatal error: invalid size register\n");
+                fprintf(stderr, "Invalid size register\n");
                 return 2;
             }
-            break;
+            break;\
         }
         case 9:
         { // -b
             index++;
             if (index == argc)
             {
-                fprintf(stderr, "Fatal error: empty parameter -s\n");
+                fprintf(stderr, "Empty parameter -s\n");
                 return 2;
             }
             size_block_in_bytes = (uint8_t)atoi(argv[index]);
             if (size_block_in_bytes <= 0 || size_block_in_bytes > 16)
             {
-                fprintf(stderr, "Fatal error: invalid size of block\n");
+                fprintf(stderr, "Invalid size of block\n");
                 return 2;
             }
             break;
         }
         case 10:
         { // -h
-            fprintf(stderr, "Parameters:\n*  -i name input file\n* -k string with key\n*  -m mode {ECB, CBC, CTR, OFB, CFB, IMITO}\n*  -p mode of padding block {1-3}\n*  -c encrypt or decrypt {e, d}\n*  -b count byte in last block for first mode of padding block {1-8}\n*  -s size MAC {1-128}\n*  -h help\n");
+            fprintf(stderr, "The program encrypts input files and directories and saves the result into one file.\n Parameters:\n *  -i names of input files or/and directores for encryption and name of cryptofile for decryption.\n *  -o name of output cryptofile for encryption or name of directory with decrypted files or/and directores for decryption.\n *  -k string with key.\n *  -m mode of a encryption {\"ECB\", \"CBC\", \"CTR\", \"OFB\", \"CFB\", \"IMITO\"}.\n *  -p mode of padding block {1, 2, 3}.\n *  -c encrypt or decrypt {e, d}.\n *  -s size MAC in bits {1-128}.\n *  -r size register in bytes multiple by 16 for modes of encryption or decryption \"CBC\", \"OFB\", \"CFB\".\n *  -b size block in bytes from 1 to 16 for modes of encryption or decryption \"CTR\", \"OFB\", \"CFB\".\n *  -h help.\nStandart parameters:\n *  mode is ENCRYPT.\n *  mode of a encryption is \"ECB\".\n *  mode of padding block is 1.\n *  size register is 32 bytes.\n *  size block is 16 bytes.\n *  size MAC for mode \"IMITO\" is 64 bits.\n *  output name for encryption is \"cryptofile.out\" and for decryption is \"decryption_dir\".\n The program returns 0 is good, 1 is error of malloc, 2 is error in parameters, 3 is error of read/write file or directory.\n");
             return 0;
         }
         case -1:
         {
-            fprintf(stderr, "Fatal error: invalid parameter: %s\n", argv[index]);
+            fprintf(stderr, "Invalid parameter: %s\n", argv[index]);
             return 2;
         }
         }
@@ -374,12 +375,27 @@ int main(int argc, char **argv)
             uint64_t size_file;
             for (int i = index_begining_names; i < index_begining_names + count_names; i++)
             {
-                switch (getTypeFile(argv[i]))
+                path.value = argv[i];
+                path.len = strlen(argv[i]);
+                if(path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
+                {
+                    path.value[path.len - 1] = '\0';
+                    path.len--;
+                }
+                path = getAbsolutePath(path.value);
+                if (path.value == NULL)
+                {
+                    free(iteration_keys);
+                    if (initial_vector != NULL)
+                    {
+                        free(initial_vector);
+                    }
+                    return 1;
+                }
+                switch (getTypeFile(path))
                 {
                 case REGFILE:
                 {
-                    path.value = argv[i];
-                    path.len = strlen(argv[i]);
                     name = getName(path);
                     if (name.value == NULL)
                     {
@@ -408,23 +424,6 @@ int main(int argc, char **argv)
                 }
                 case DIRECTORY:
                 {
-                    path = getAbsolutePath(argv[i]);
-                    if (path.value == NULL)
-                    {
-                        free(iteration_keys);
-                        if (initial_vector != NULL)
-                        {
-                            free(initial_vector);
-                        }
-                        return 1;
-                    }
-
-                    if (path.value[path.len - 1] == '/' || path.value[path.len - 1] == '\\')
-                    {
-                        path.value[path.len - 1] = '\0';
-                        path.len--;
-                    }
-
                     name = getName(path);
                     if (name.value == NULL)
                     {
@@ -439,7 +438,6 @@ int main(int argc, char **argv)
                     printf("Directory: %s\n", name.value);
                     result = writeDirectory(path, name, cryptofile);
                     free(name.value);
-                    free(path.value);
                     if (result != 0)
                     {
                         fprintf(stderr, "Fatal error: error of writing directory: %d\n", __LINE__);
@@ -453,15 +451,24 @@ int main(int argc, char **argv)
                     break;
                 }
                 }
+            free(path.value);
             }
             
             fclose(cryptofile);
         } // mode_encryption == IMITO
         else
         {
+            String path;
             for (int i = index_begining_names; i < index_begining_names + count_names; i++)
             {
-                switch (getTypeFile(argv[i]))
+                path.value = argv[i];
+                path.len = strlen(path.value);
+                if(path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
+                {
+                    path.value[path.len - 1] = '\0';
+                    path.len--;
+                }
+                switch (getTypeFile(path))
                 {
                 case REGFILE:
                 {
@@ -490,6 +497,7 @@ int main(int argc, char **argv)
             free(iteration_keys);
             return 3;
         }
+        uint64_t size_cryptofile = getSizeFile(cryptofile);
         char header_cryptofile[16];
         if (fread(header_cryptofile, 1, 16, cryptofile) != 16)
         {
@@ -537,7 +545,8 @@ int main(int argc, char **argv)
             return 3;
         }
         String absolute_path = getAbsolutePath(output_name);
-        result = readCryptofile(cryptofile, absolute_path);
+        uint64_t size_data = size_cryptofile - ftell(cryptofile);
+        result = readCryptofile(cryptofile, absolute_path, size_data);
         if (result != 0)
         {
             fprintf(stderr, "Fatal error: error of readCryptofile\n");
@@ -554,6 +563,9 @@ int main(int argc, char **argv)
     return 0;
 }
 
+/// @brief Finction checks number of input parameter.
+/// @param prm pointer to the parameter in format "-*\0"
+/// @return 0-10 is number of parameter, -1 is error.
 int parameterDefinition(char *prm)
 {
     if (prm[0] != '-' || prm[2] != 0)
@@ -587,6 +599,8 @@ int parameterDefinition(char *prm)
     }
 }
 
+/// @brief Function compares for equal two strings. Function don't check null parameters.
+/// @return 1 is equal, 0 is not equal.
 int strEQ(char *strFirst, char *strSecond)
 {
     int index = 0;
@@ -601,6 +615,9 @@ int strEQ(char *strFirst, char *strSecond)
     return 0;
 }
 
+/// @brief Function returns the number of mode.
+/// @param mode string with name of the mode.
+/// @return 1-6 is number of mode, 0 if mode don't exist.
 int modeDefinition(char *mode)
 {
     if (strEQ(mode, "ECB"))
@@ -630,6 +647,8 @@ int modeDefinition(char *mode)
     return 0;
 }
 
+/// @brief Function create initial vector and save result to @initial_vector.
+/// @return 0 is good, 1 is error of malloc, 3 is error of fread.
 int createInitialVector()
 {
     int size_initial_vector;
@@ -672,10 +691,13 @@ int createInitialVector()
     return 0;
 }
 
-int getTypeFile(char *path)
+/// @brief Function checks of type of file with @path.
+/// @param path path to file.
+/// @return REGFILE, DIRECTORY or 0 in often cases.
+int getTypeFile(String path)
 {
     struct stat path_stat;
-    if (stat(path, &path_stat) == -1)
+    if (stat(path.value, &path_stat) == -1)
     {
         fprintf(stderr, "Error: stat for \'%s\'. Maybe file don't exist\n", path);
         return 0;
@@ -688,10 +710,13 @@ int getTypeFile(char *path)
     {
         return DIRECTORY;
     }
-    fprintf(stderr, "File %s unsupported\n", path);
+    fprintf(stderr, "File %s unsupported\n", path.value);
     return 0;
 }
 
+/// @brief Function create new memory and saves size of this memory in @size.
+/// @param size pointer to memory, in which will saved size of memory.
+/// @return pointer on memory.
 char *createHeaderCryptofile(uint32_t *size)
 {
     /// header of cryptofile has next structure:
@@ -732,6 +757,11 @@ char *createHeaderCryptofile(uint32_t *size)
     return header_cryptofile;
 }
 
+/// @brief Function encrypts file @input with size @size_input_file and writes result to @output
+/// @param input pointer of input file for encrypt, opened by "rb".
+/// @param output pointer of output file for writing result, opened by "wb".
+/// @param size_input_file size of @input file in bytes.
+/// @return result of encryption operation: 0 is good, result < 0 is error.
 int encryptFile(FILE *input, FILE *output, uint64_t size_input_file)
 {
     int result;
@@ -772,6 +802,12 @@ int encryptFile(FILE *input, FILE *output, uint64_t size_input_file)
     return result;
 }
 
+/// @brief Function encrypts file @input with size @size_input_file and writes result to @output
+/// @param input pointer of input file for encrypt, opened by "rb".
+/// @param output pointer of output file for writing result, opened by "wb".
+/// @param size_input_file size of @input file in bytes.
+/// @param length_last_block length of last block of @input file in bytes. Need for first mode of padding nulls.
+/// @return result of encryption operation: 0 is good, result < 0 is error.
 int decryptFile(FILE *input, FILE *output, uint64_t size_input_file, uint8_t length_last_block)
 {
     int result;
@@ -812,6 +848,9 @@ int decryptFile(FILE *input, FILE *output, uint64_t size_input_file, uint8_t len
     return result;
 }
 
+/// @brief Function fills with zero of memory @str.value with size @size after '\0'.
+/// @param str structure with with array of characters and '\0' terminated.
+/// @param size size memory which will be filled with zero.
 void cleanMemory(String str, int size)
 {
     for (uint64_t i = str.len; i < size; i++)
@@ -820,6 +859,11 @@ void cleanMemory(String str, int size)
     }
 }
 
+/// @brief Function encrypts directory with path @path and writes result to @output. 
+/// @param path path to directory.
+/// @param name name of directory.
+/// @param output pointer of output file for writing result, opened by "wb".
+/// @return 0 is good, -1 if error with io, -2 if error with malloc.
 int writeDirectory(String path, String name, FILE *output)
 {
     DIR *dir = opendir(path.value);
@@ -928,6 +972,10 @@ int writeDirectory(String path, String name, FILE *output)
     return 0;
 }
 
+/// @brief Function creates new string with path to file or directory with name @name. Result: @path+'/'+@name or @path+'\\'+@name. 
+/// @param path struct String with path to file or directory.
+/// @param name struct String with name of file or directory.
+/// @return resulting struct string with new path to file or directory.
 String createPath(String path, String name)
 {
     String new_path;
@@ -955,6 +1003,11 @@ String createPath(String path, String name)
     return new_path;
 }
 
+/// @brief Function encrypts file with path @path and name @name and writes result to @output.
+/// @param path pointer on path to file.
+/// @param name pointer on name of file.
+/// @param output pointer of output file for writing result, opened by "wb".
+/// @return 0 is good, -1 if error with io, -2 if error with malloc.
 int writeFile(char *path, char *name, FILE *output)
 {
     FILE *file = fopen(path, "rb");
@@ -970,7 +1023,7 @@ int writeFile(char *path, char *name, FILE *output)
     if (header == NULL)
     {
         fprintf(stderr, "Fatal error: cannot create header for file: %d\n", __LINE__);
-        return -1;
+        return -2;
     }
     if (mode_padding_nulls == PROC_ADD_NULLS_1)
     {
@@ -991,6 +1044,17 @@ int writeFile(char *path, char *name, FILE *output)
     return result;
 }
 
+/// @brief Function creates header for file of directory.
+/// Header has next structure:
+/// - 256 bytes for name;
+/// - byte for type: 'f' or 'd' + 7 nulls bytes;
+/// - 8 bytes for size of file or directory (in output file);
+/// - 32 bytes for hash sum.
+/// @param name name of file or directory.
+/// @param type 'f' is file, 'd' is directory.
+/// @param size size of file or directory (in output file).
+/// @param sha256_sum hash sum.
+/// @return pointer on block of memory with size 304 bytes.
 char *createHeader(char *name, char type, uint64_t size, vector256_t sha256_sum)
 {
     char *header = (char *)malloc(304);
@@ -1009,6 +1073,7 @@ char *createHeader(char *name, char type, uint64_t size, vector256_t sha256_sum)
     return header;
 }
 
+/// @brief Function return last name in path in string with new memory.
 String getName(String path)
 {
     String name;
@@ -1042,6 +1107,9 @@ String getName(String path)
     return name;
 }
 
+
+/// @brief Function returns string with new absolute path to file or directory.
+/// @param path path to file or directory.
 String getAbsolutePath(char *path)
 {
     String absolutePath = {NULL, 0};
@@ -1069,9 +1137,16 @@ String getAbsolutePath(char *path)
     return absolutePath;
 }
 
+/// @brief Function read header from @input file and writes this header to struct @header
+/// @return 0 is good, -1 is error of read file, -2 is error of malloc.
 int readHeader(FILE *input, struct header *header)
 {
     uint8_t *data = (uint8_t *)malloc(304);
+    if(data == NULL)
+    {
+        fprintf(stderr, "Fatal error: error of malloc: %d\n", __LINE__);
+        return -2;
+    }
     int result = fread(data, 1, 304, input);
     if (result != 304)
     {
@@ -1089,6 +1164,8 @@ int readHeader(FILE *input, struct header *header)
     return 0;
 }
 
+/// @brief Function creates directory in the path @path and mode @mode.
+/// @return 0 is good, -1 is error of create directory.
 int createDirectory(char *path, int mode)
 {
 #ifdef _WIN32
@@ -1115,7 +1192,12 @@ int createDirectory(char *path, int mode)
     return 0;
 }
 
-int readCryptofile(FILE *input, String path)
+/// @brief Functuon read from cryptofile @size bytes and decrypted files.
+/// @param input cryptofile opened by "rb".
+/// @param path path on directory in which will saved files.
+/// @param size count of bytes for decryption.
+/// @return 0 is good, often is error. 
+int readCryptofile(FILE *input, String path, uint64_t size)
 {
     struct header header;
     int result;
@@ -1124,6 +1206,11 @@ int readCryptofile(FILE *input, String path)
     FILE *file = NULL;
     vector256_t hash;
     char count_errors = 0;
+    uint64_t readable_size = 0;
+    if(size == 0)
+    {
+        return 0;
+    }
     while (!feof(input) && !ferror(input))
     {
         result = readHeader(input, &header);
@@ -1140,6 +1227,7 @@ int readCryptofile(FILE *input, String path)
                 return -1;
             }
         }
+        readable_size += 304; 
         printf("Read header: %s\n", header.name);
         if (header.type == 'd')
         {
@@ -1161,7 +1249,7 @@ int readCryptofile(FILE *input, String path)
                     free(header.name);
                     return -3;
                 }
-                readCryptofile(input, new_path);
+                readCryptofile(input, new_path, header.size);
             }
             else
             {
@@ -1213,11 +1301,20 @@ int readCryptofile(FILE *input, String path)
                 fprintf(stderr, "Fatal error: hash sums don't equals for %s\n", header.name);
             }
         }
+        readable_size += header.size;
+        if( readable_size == size )
+        {
+            free(header.name);
+            return 0;    
+        }
         free(header.name);
     }
     return 0;
 }
 
+/// @brief Function print MAC of file.
+/// @param path path to the file.
+/// @return 0 is good, of is error.
 int printMACFile(char *path)
 {
     FILE *file = fopen(path, "rb");
@@ -1243,6 +1340,9 @@ int printMACFile(char *path)
     return 0;
 }
 
+/// @brief Function print MAC of directory (all files in this directory).
+/// @param path path to the directory.
+/// @return 0 is good, of is error.
 int printMACDirectory(char *path)
 {
     DIR *dir = opendir(path);

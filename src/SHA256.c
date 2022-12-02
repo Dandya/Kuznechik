@@ -12,7 +12,10 @@ static uint32_t k_values[64] = {
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
-static void copy_vec512_to_array(vector512_t *vec, uint8_t *array)
+/// @brief Function copy vector with size 512 bits to array with big-ending order of four bytes. 
+/// @param vec pointer to memory with size 512 bits.
+/// @param array pointer to array with size 512 bits or more.
+static void copyVec512ToArray(vector512_t *vec, uint8_t *array)
 {
     for (int i = 0; i < 16; i++)
     {
@@ -23,7 +26,8 @@ static void copy_vec512_to_array(vector512_t *vec, uint8_t *array)
     }
 }
 
-static void write_nulls_to_array(uint32_t *array, int begin, int end)
+/// @brief Function writes nulls to array from @begin index to @end.
+static void writeNullsToArray(uint32_t *array, int begin, int end)
 {
     for (int i = begin; i < end; i++)
     {
@@ -31,13 +35,17 @@ static void write_nulls_to_array(uint32_t *array, int begin, int end)
     }
 }
 
+/// @brief Function does cyclic shift to the right for @value by @offset.
+/// @return shifted @value.
 static uint32_t rotr(uint32_t value, uint8_t offset)
 {
     uint32_t tmp = value & (0xffffffff >> (32 - offset));
     return (value >> offset) | (tmp << (32 - offset));
 }
 
-static void create_adding_values(uint32_t *dwords)
+
+/// @brief Function creates values for algorithm SHA256.
+static void createAddingValues(uint32_t *dwords)
 {
     for (int i = 16; i < 64; i++)
     {
@@ -47,6 +55,11 @@ static void create_adding_values(uint32_t *dwords)
     }
 }
 
+/// @brief Function hashed @array with size @size_in_bytes and save result in @result.
+/// @param array pointer to memory with size @size_in_bytes.
+/// @param size_in_bytes size of the array.
+/// @param result pointer to memory with size 256 bits.
+/// @return 0 is good, -1 if array == NULL, -2 if result == NULL, -3 if error of malloc.
 int sha256(uint8_t *array, uint64_t size_in_bytes, vector256_t *result)
 {
     if (array == NULL && size_in_bytes != 0)
@@ -106,9 +119,9 @@ int sha256(uint8_t *array, uint64_t size_in_bytes, vector256_t *result)
     uint32_t a, b, c, d, e, f, g, h, t1, t2;
     for (int iteration_for_vec512 = 0; iteration_for_vec512 < count_vec512; iteration_for_vec512++)
     {
-        copy_vec512_to_array(data_v512 + iteration_for_vec512, (uint8_t *)dwords);
-        write_nulls_to_array(dwords, 16, 64);
-        create_adding_values(dwords);
+        copyVec512ToArray(data_v512 + iteration_for_vec512, (uint8_t *)dwords);
+        writeNullsToArray(dwords, 16, 64);
+        createAddingValues(dwords);
         a = h0;
         b = h1;
         c = h2;
