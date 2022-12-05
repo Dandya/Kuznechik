@@ -106,6 +106,15 @@ int main(int argc, char **argv)
     size_register_in_bytes = 32;
     size_block_in_bytes = 16;
 
+    uint8_t count_i_params = 0;
+    uint8_t count_o_params = 0;
+    uint8_t count_k_params = 0;
+    uint8_t count_m_params = 0;
+    uint8_t count_p_params = 0;
+    uint8_t count_c_params = 0;
+    uint8_t count_s_params = 0;
+    uint8_t count_r_params = 0;
+    uint8_t count_b_params = 0;
     // read and set parameters of working
     for (int index = 1; index < argc; index++)
     {
@@ -118,6 +127,12 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Empty parameter -i\n");
                 return 2;
+            }
+            count_i_params++;
+            if (count_i_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -i\n");
+                continue;
             }
             index_begining_names = index;
             while (index < argc)
@@ -145,6 +160,12 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Empty parameter -o\n");
                 return 2;
             }
+            count_o_params++;
+            if (count_o_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -o\n");
+                continue;
+            }
             output_name = argv[index];
             if (parameterDefinition(output_name) != -1)
             {
@@ -160,6 +181,12 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Empty parameter -k\n");
                 return 2;
+            }
+            count_k_params++;
+            if (count_k_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -k\n");
+                continue;
             }
             key_str = argv[index];
             if (parameterDefinition(key_str) != -1)
@@ -177,6 +204,12 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Empty parameter -m\n");
                 return 2;
             }
+            count_m_params++;
+            if (count_m_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -m\n");
+                continue;
+            }
             mode_encryption = modeDefinition(argv[index]);
             if (mode_encryption == 0)
             {
@@ -193,6 +226,12 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Empty parameter -p\n");
                 return 2;
             }
+            count_p_params++;
+            if (count_p_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -p\n");
+                continue;
+            }
             mode_padding_nulls = *(argv[index]) - '0';
             if (mode_padding_nulls < 1 || mode_padding_nulls > 3)
             {
@@ -208,6 +247,12 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Empty parameter -c\n");
                 return 2;
+            }
+            count_c_params++;
+            if (count_c_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -c\n");
+                continue;
             }
             mode = *(argv[index]);
             if (mode == 'e')
@@ -233,6 +278,12 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Empty parameter -s\n");
                 return 2;
             }
+            count_s_params++;
+            if (count_s_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -s\n");
+                continue;
+            }
             size_MAC = (uint8_t)atoi(argv[index]);
             if (size_MAC > 128 || size_MAC < 1)
             {
@@ -249,6 +300,12 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Empty parameter -s\n");
                 return 2;
             }
+            count_r_params++;
+            if (count_r_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -r\n");
+                continue;
+            }
             size_register_in_bytes = (uint8_t)atoi(argv[index]);
             if (size_register_in_bytes <= 0 || size_register_in_bytes % SIZE_BLOCK != 0)
             {
@@ -264,6 +321,12 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Empty parameter -s\n");
                 return 2;
+            }            
+            count_b_params++;
+            if (count_b_params >= 2)
+            {
+                fprintf(stderr, "Using first parameter -b\n");
+                continue;
             }
             size_block_in_bytes = (uint8_t)atoi(argv[index]);
             if (size_block_in_bytes <= 0 || size_block_in_bytes > 16)
