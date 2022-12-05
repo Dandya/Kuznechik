@@ -52,6 +52,7 @@ void cleanMemory(String str, int size);
 int writeDirectory(String path, String name, FILE *output);
 String createPath(String path, String name);
 int writeFile(char *path, char *name, FILE *output);
+uint64_t resulted_size(uint64_t size);
 char *createHeader(char *name, char type, uint64_t size, vector256_t sha256_sum);
 String getName(String path);
 String getAbsolutePath(char *path);
@@ -1082,7 +1083,7 @@ int writeFile(char *path, char *name, FILE *output)
     uint64_t size_file = getSizeFile(file);
     vector256_t sha256_sum;
     sha256(name, strlen(name), &sha256_sum);
-    char *header = createHeader(name, 'f', size_file, sha256_sum);
+    char *header = createHeader(name, 'f', resulted_size(size_file), sha256_sum);
     if (header == NULL)
     {
         fprintf(stderr, "Fatal error: cannot create header for file: %d\n", __LINE__);
@@ -1105,6 +1106,27 @@ int writeFile(char *path, char *name, FILE *output)
     free(header);
     fclose(file);
     return result;
+}
+
+/// @brief Function return the size of file after procedure of padding nulls.
+/// @param size size of file before procedure of padding nulls.
+/// @return size of file after procedure of padding nulls.
+uint64_t resulted_size(uint64_t size){
+    if (size % SIZE_BLOCK == 0)
+    {
+        if (mode_padding_nulls == PROC_ADD_NULLS_1 || mode_padding_nulls == PROC_ADD_NULLS_3)
+        {
+            return size;
+        }
+        else
+        {
+            return size + SIZE_BLOCK;
+        }
+    }
+    else
+    {
+        return size + (SIZE_BLOCK - size % SIZE_BLOCK);   
+    }
 }
 
 /// @brief Function creates header for file of directory.
