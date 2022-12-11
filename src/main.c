@@ -72,7 +72,7 @@ int size_block_in_bytes;
 uint8_t *MAC;
 uint8_t size_MAC;
 
-/// @brief The program encrypts input files and directories and saves the result into one file. 
+/// @brief The program encrypts input files and directories and saves the result into one file.
 /// Parameters:
 /// *  -i names of input files or/and directores for encryption and name of cryptofile for decryption #1
 /// *  -o name of output cryptofile for encryption or name of directory with decrypted files or/and directores for decryption #2
@@ -313,7 +313,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, "Invalid size register\n");
                 return 2;
             }
-            break;\
+            break;
         }
         case 9:
         { // -b
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
             {
                 fprintf(stderr, "Empty parameter -s\n");
                 return 2;
-            }            
+            }
             count_b_params++;
             if (count_b_params >= 2)
             {
@@ -441,7 +441,7 @@ int main(int argc, char **argv)
             {
                 path.value = argv[i];
                 path.len = strlen(argv[i]);
-                if(path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
+                if (path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
                 {
                     path.value[path.len - 1] = '\0';
                     path.len--;
@@ -515,9 +515,9 @@ int main(int argc, char **argv)
                     break;
                 }
                 }
-            free(path.value);
+                free(path.value);
             }
-            
+
             fclose(cryptofile);
         } // mode_encryption == IMITO
         else
@@ -527,7 +527,7 @@ int main(int argc, char **argv)
             {
                 path.value = argv[i];
                 path.len = strlen(path.value);
-                if(path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
+                if (path.value[path.len - 1] == '\\' || path.value[path.len - 1] == '/')
                 {
                     path.value[path.len - 1] = '\0';
                     path.len--;
@@ -575,7 +575,7 @@ int main(int argc, char **argv)
         mode_padding_nulls = header_cryptofile[5];
         size_block_in_bytes = header_cryptofile[6];
         size_register_in_bytes = *(((uint32_t *)header_cryptofile) + 2);
-        if( size_header_cryptofile != size_register_in_bytes + 16 )
+        if (size_header_cryptofile != size_register_in_bytes + 16)
         {
             printf("Uncorrect key\n");
             free(iteration_keys);
@@ -923,7 +923,7 @@ void cleanMemory(String str, int size)
     }
 }
 
-/// @brief Function encrypts directory with path @path and writes result to @output. 
+/// @brief Function encrypts directory with path @path and writes result to @output.
 /// @param path path to directory.
 /// @param name name of directory.
 /// @param output pointer of output file for writing result, opened by "wb".
@@ -1036,7 +1036,7 @@ int writeDirectory(String path, String name, FILE *output)
     return 0;
 }
 
-/// @brief Function creates new string with path to file or directory with name @name. Result: @path+'/'+@name or @path+'\\'+@name. 
+/// @brief Function creates new string with path to file or directory with name @name. Result: @path+'/'+@name or @path+'\\'+@name.
 /// @param path struct String with path to file or directory.
 /// @param name struct String with name of file or directory.
 /// @return resulting struct string with new path to file or directory.
@@ -1111,21 +1111,29 @@ int writeFile(char *path, char *name, FILE *output)
 /// @brief Function return the size of file after procedure of padding nulls.
 /// @param size size of file before procedure of padding nulls.
 /// @return size of file after procedure of padding nulls.
-uint64_t resulted_size(uint64_t size){
-    if (size % SIZE_BLOCK == 0)
+uint64_t resulted_size(uint64_t size)
+{
+    if (mode_encryption == ECB || mode_encryption == CBC)
     {
-        if (mode_padding_nulls == PROC_ADD_NULLS_1 || mode_padding_nulls == PROC_ADD_NULLS_3)
+        if (size % SIZE_BLOCK == 0)
         {
-            return size;
+            if (mode_padding_nulls == PROC_ADD_NULLS_1 || mode_padding_nulls == PROC_ADD_NULLS_3)
+            {
+                return size;
+            }
+            else
+            {
+                return size + SIZE_BLOCK;
+            }
         }
         else
         {
-            return size + SIZE_BLOCK;
+            return size + (SIZE_BLOCK - size % SIZE_BLOCK);
         }
     }
     else
     {
-        return size + (SIZE_BLOCK - size % SIZE_BLOCK);   
+        return size;
     }
 }
 
@@ -1192,7 +1200,6 @@ String getName(String path)
     return name;
 }
 
-
 /// @brief Function returns string with new absolute path to file or directory.
 /// @param path path to file or directory.
 String getAbsolutePath(char *path)
@@ -1227,7 +1234,7 @@ String getAbsolutePath(char *path)
 int readHeader(FILE *input, struct header *header)
 {
     uint8_t *data = (uint8_t *)malloc(304);
-    if(data == NULL)
+    if (data == NULL)
     {
         fprintf(stderr, "Fatal error: error of malloc: %d\n", __LINE__);
         return -2;
@@ -1281,7 +1288,7 @@ int createDirectory(char *path, int mode)
 /// @param input cryptofile opened by "rb".
 /// @param path path on directory in which will saved files.
 /// @param size count of bytes for decryption.
-/// @return 0 is good, often is error. 
+/// @return 0 is good, often is error.
 int readCryptofile(FILE *input, String path, uint64_t size)
 {
     struct header header;
@@ -1292,7 +1299,7 @@ int readCryptofile(FILE *input, String path, uint64_t size)
     vector256_t hash;
     char count_errors = 0;
     uint64_t readable_size = 0;
-    if(size == 0)
+    if (size == 0)
     {
         return 0;
     }
@@ -1312,7 +1319,7 @@ int readCryptofile(FILE *input, String path, uint64_t size)
                 return -1;
             }
         }
-        readable_size += 304; 
+        readable_size += 304;
         printf("Read header: %s\n", header.name);
         if (header.type == 'd')
         {
@@ -1387,10 +1394,10 @@ int readCryptofile(FILE *input, String path, uint64_t size)
             }
         }
         readable_size += header.size;
-        if( readable_size == size )
+        if (readable_size == size)
         {
             free(header.name);
-            return 0;    
+            return 0;
         }
         free(header.name);
     }
